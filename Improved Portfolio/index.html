@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jack Whitehead — Digital Designer</title>
+<meta name="description" content="Portfolio of Jack Whitehead, a digital design student building his way toward a first internship or junior role.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-16x16.png" type="image/png" sizes="16x16">
+<link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=12">
+</head>
+<body>
+
+<!-- Hidden sprite of hand-drawn doodle shapes, reused via <use> -->
+<svg class="doodle-defs" aria-hidden="true" focusable="false">
+  <defs>
+    <path id="doodle-star" d="M20 2 C21.5 9 22 12 29 13.5 C22.5 15.5 21 18 20 26 C18.7 18.5 17.2 15.8 10 13.8 C17 12 18.5 9.3 20 2 Z" />
+    <path id="doodle-underline" d="M2 8 C 20 2, 45 2, 68 6 C 85 9, 98 4, 118 7" />
+    <path id="doodle-underline2" d="M2 6 C 25 10, 60 10, 90 5 C 105 3, 118 6, 132 4" />
+    <path id="doodle-circle" d="M62 6 C 30 2, 8 18, 10 42 C 12 68, 40 82, 66 78 C 96 74, 112 52, 106 28 C 101 8, 78 -2, 58 4" />
+    <path id="doodle-arrow-curve" d="M4 6 C 24 -4, 52 2, 68 22 C 76 32, 78 42, 74 54" />
+    <path id="doodle-arrow-head" d="M62 46 L74 54 L82 40" />
+    <path id="doodle-scribble" d="M2 14 C 10 4, 22 4, 30 12 C 38 20, 48 4, 58 10 C 66 15, 74 4, 84 12" />
+    <path id="doodle-quote" d="M4 20 C 4 8 12 2 22 2 C 20 10 20 16 22 22 C 24 28 18 32 10 30 C 6 28 4 24 4 20 Z M28 20 C 28 8 36 2 46 2 C 44 10 44 16 46 22 C 48 28 42 32 34 30 C 30 28 28 24 28 20 Z" />
+    <path id="doodle-squiggle-arrow-down" d="M6 4 C 2 18 10 30 6 44 M6 44 L 0 38 M6 44 L 12 38" />
+    <path id="doodle-play-triangle" d="M6 3.5 C 6.6 3.2 7.3 3.4 7.9 3.8 L 18.4 10.6 C 19.4 11.2 19.3 12.7 18.3 13.3 L 7.6 20.1 C 6.8 20.6 5.8 20.1 5.7 19.1 C 5.3 14 5.4 8.6 6 3.5 Z" />
+  </defs>
+</svg>
+
+<div class="grain" aria-hidden="true"></div>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <a class="logo" href="#top">
+      JW<span class="logo-dot">.</span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Primary">
+      <ul>
+        <li><a href="#about" class="nav-link">About</a></li>
+        <li><a href="#work" class="nav-link">Work</a></li>
+        <li><a href="#skills" class="nav-link">Skills</a></li>
+        <li><a href="#contact" class="nav-link">Contact</a></li>
+      </ul>
+      <span class="nav-indicator" id="nav-indicator" aria-hidden="true"></span>
+    </nav>
+    <a class="btn btn-small header-cta" href="#contact">Say hello</a>
+    <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobile-menu">
+  <ul>
+    <li><a href="#about" class="mobile-link">About</a></li>
+    <li><a href="#work" class="mobile-link">Work</a></li>
+    <li><a href="#skills" class="mobile-link">Skills</a></li>
+    <li><a href="#contact" class="mobile-link">Contact</a></li>
+  </ul>
+  <svg class="doodle mobile-menu-star" viewBox="0 0 40 28" aria-hidden="true"><use href="#doodle-star" /></svg>
+</div>
+
+<main id="main">
+
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow eyebrow-hero reveal" data-reveal>
+          <svg class="doodle doodle-inline-star" viewBox="0 0 40 28" aria-hidden="true"><use href="#doodle-star" /></svg>
+          currently designing my way through year four
+        </p>
+
+        <h1 class="hero-title">
+          <span class="hero-line hero-line-1"><span class="reveal-word">Jack</span> <span class="reveal-word">Whitehead</span></span>
+          <span class="hero-line hero-line-2">
+            <span class="hero-highlight">
+              <span class="reveal-word">digital</span> <span class="reveal-word">designer,</span>
+              <svg class="doodle doodle-underline sketch-draw" viewBox="0 0 120 12" preserveAspectRatio="none" aria-hidden="true"><use href="#doodle-underline" /></svg>
+            </span>
+            <br class="line-break-mobile">
+            <span class="reveal-word">always</span> <span class="reveal-word">in</span> <span class="reveal-word">motion</span>
+          </span>
+        </h1>
+
+        <p class="hero-sub reveal" data-reveal>
+          I'm a digital designer focused on UX/UI, and I genuinely enjoy the whole process. Sketching ideas in Figma, building them in code (HTML, CSS, JavaScript), or bringing them to life in Adobe. 
+        </p>
+
+        <div class="hero-cta reveal" data-reveal>
+          <a href="#work" class="btn btn-primary">See my work</a>
+          <a href="#contact" class="btn btn-ghost">Let's talk</a>
+        </div>
+      </div>
+
+      <div class="hero-photo reveal" data-reveal>
+        <span class="hero-photo-tape" aria-hidden="true"></span>
+        <div class="hero-photo-frame">
+          <img
+            src="images/jackwhitehead-trimmed.png"
+            alt="Jack Whitehead smiling and holding a friend's kitten"
+            class="hero-photo-img"
+            width="900" height="1263"
+            loading="eager"
+          >
+        </div>
+        <svg class="doodle hero-photo-star float-doodle" viewBox="0 0 40 28" aria-hidden="true"><use href="#doodle-star" /></svg>
+        <p class="hero-photo-caption">probably overthinking 4px of padding</p>
+      </div>
+    </div>
+
+    <svg class="doodle doodle-hero-scribble" viewBox="0 0 86 26" aria-hidden="true"><use href="#doodle-scribble" /></svg>
+
+    <div class="scroll-cue" aria-hidden="true">
+      <span>scroll</span>
+      <svg class="doodle" viewBox="0 0 24 56"><use href="#doodle-squiggle-arrow-down" /></svg>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about" id="about">
+    <div class="section-inner">
+      <p class="eyebrow reveal" data-reveal>— a bit about me</p>
+      <h2 class="section-title reveal" data-reveal>
+        Still early.
+        <span class="underline-wrap">Already building.
+          <svg class="doodle doodle-underline2 sketch-draw" viewBox="0 0 132 10" preserveAspectRatio="none" aria-hidden="true"><use href="#doodle-underline2" /></svg>
+        </span>
+      </h2>
+
+      <div class="about-grid">
+        <p class="about-bio reveal" data-reveal>
+          I have been studying digital design for 3 years so far, and I've learned a lot. On top of that I've worked at Brandium and Airworks, where I learned that good work happens in teams. I actually listen to feedback and use it to get better fast. I'm bilingual (English/Dutch), based in Amsterdam, studying at HvA, 21, and I'm here to do solid work and help make the people around me better at their jobs too.
+        </p>
+
+        <div class="stat-grid">
+          <div class="stat-card reveal" data-reveal>
+            <span class="stat-number">4th<span class="stat-suffix">yr</span></span>
+            <span class="stat-label">HvA - Communication and Multimedia Design</span>
+          </div>
+          <div class="stat-card stat-card-accent reveal" data-reveal>
+            <span class="stat-number">
+              6
+              <svg class="doodle doodle-stat-circle sketch-draw" viewBox="0 0 116 84" aria-hidden="true"><use href="#doodle-circle" /></svg>
+            </span>
+            <span class="stat-label">For client projects shipped so far</span>
+          </div>
+          <div class="stat-card reveal" data-reveal>
+            <span class="stat-number">3</span>
+            <span class="stat-label">Tools I use daily</span>
+            <a href="#skills" class="stat-card-hint">
+              See what else I know ↓
+              <svg class="doodle stat-card-hint-scribble" viewBox="0 0 86 26" aria-hidden="true"><use href="#doodle-scribble" /></svg>
+            </a>
+          </div>
+          <div class="stat-card reveal" data-reveal>
+            <svg class="doodle stat-card-corner-star" viewBox="0 0 40 28" aria-hidden="true"><use href="#doodle-star" /></svg>
+            <span class="stat-number stat-number-small">Open to</span>
+            <span class="stat-label">Internships &amp; junior roles, 2027</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORK -->
+  <section class="work" id="work">
+    <div class="section-inner">
+      <p class="eyebrow reveal" data-reveal>— selected work</p>
+      <h2 class="section-title reveal" data-reveal>A handful of things I've made</h2>
+      <p class="section-sub reveal" data-reveal>
+        Placeholder projects for now — real case studies land as I finish them.
+        Tap a card for a closer look.
+      </p>
+
+      <div class="work-grid">
+
+        <div class="work-card reveal" data-reveal style="--tilt:-2deg">
+          <span class="work-card-visual work-visual-video">
+            <video
+              class="work-card-video-el"
+              src="images/Axventures.mp4"
+              muted
+              playsinline
+              preload="auto"
+              aria-label="Axventures project preview video"
+            ></video>
+            <button class="work-card-play" type="button" aria-label="Play project preview video">
+              <svg class="work-card-play-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#doodle-play-triangle" /></svg>
+            </button>
+          </span>
+          <button class="work-card-body work-card-trigger" type="button" data-project="0">
+            <span class="work-card-tag">UX/UI · Website</span>
+            <span class="work-card-title">Axventures</span>
+            <span class="work-card-desc">A modern mental health coaching site brought to life with expressive motion</span>
+          </button>
+        </div>
+
+        <button class="work-card work-card-trigger reveal" data-reveal data-project="1" style="--tilt:1.5deg">
+          <span class="work-card-visual work-visual-2">
+            <img
+              src="images/bolscout-web.png"
+              alt="Bolscout seller dashboard showing revenue, cost, and profit charts for a Bol.com store"
+              class="work-card-visual-img"
+              width="1200" height="639"
+              loading="lazy"
+            >
+          </span>
+          <span class="work-card-body">
+            <span class="work-card-tag">Product Design · UI / Data Viz</span>
+            <span class="work-card-title">Bolscout</span>
+            <span class="work-card-desc">A financial management interface designed to make complex information clear</span>
+          </span>
+        </button>
+
+        <button class="work-card work-card-trigger reveal" data-reveal data-project="2" style="--tilt:2deg">
+          <span class="work-card-visual work-visual-3">
+            <img
+              src="images/qualiko-web.jpg"
+              alt="Qualiko recipe book cover spread with a chef preparing a chicken doner kebab"
+              class="work-card-visual-img work-card-visual-img-top"
+              width="1000" height="702"
+              loading="lazy"
+            >
+          </span>
+          <span class="work-card-body">
+            <span class="work-card-tag">Branding · Digital Design</span>
+            <span class="work-card-title">Qualiko Recipe Book</span>
+            <span class="work-card-desc">An extensive recipe book featuring 50 recipes, designed for a leading chicken manufacturer</span>
+          </span>
+        </button>
+
+        <button class="work-card work-card-trigger reveal" data-reveal data-project="3" style="--tilt:-1.5deg">
+          <span class="work-card-visual work-visual-4">
+            <img
+              src="images/walkwise-web.jpg"
+              alt="Walkwise app screen flow showing onboarding, walk tracking, routes, goals, and profile screens"
+              class="work-card-visual-img work-card-visual-img-top"
+              width="1400" height="1225"
+              loading="lazy"
+            >
+          </span>
+          <span class="work-card-body">
+            <span class="work-card-tag">Interaction · Prototype</span>
+            <span class="work-card-title">Walkwise</span>
+            <span class="work-card-desc">Designed a multi-device app connecting walking and mental wellbeing through playful branding and daily goals</span>
+          </span>
+        </button>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="skills" id="skills">
+    <div class="section-inner">
+      <p class="eyebrow eyebrow-light reveal" data-reveal>— tools &amp; skills</p>
+      <h2 class="section-title section-title-light reveal" data-reveal>In the toolbox</h2>
+
+      <div class="skills-grid">
+        <div class="skills-group reveal" data-reveal>
+          <h3 class="skills-group-title">Design</h3>
+          <ul class="chip-list">
+            <li class="chip">Figma</li>
+            <li class="chip">Adobe XD</li>
+            <li class="chip">Illustrator</li>
+            <li class="chip">Photoshop</li>
+            <li class="chip">Miro</li>
+            <li class="chip">Notion</li>
+          </ul>
+        </div>
+        <div class="skills-group reveal" data-reveal>
+          <h3 class="skills-group-title">Prototyping &amp; motion</h3>
+          <ul class="chip-list">
+            <li class="chip">Premiere Pro</li>
+            <li class="chip">After Effects</li>
+            <li class="chip">Jitter</li>
+          </ul>
+        </div>
+        <div class="skills-group reveal" data-reveal>
+          <h3 class="skills-group-title">Front-end basics</h3>
+          <ul class="chip-list">
+            <li class="chip">HTML &amp; CSS</li>
+            <li class="chip">A little JavaScript</li>
+          </ul>
+        </div>
+        <div class="skills-group reveal" data-reveal>
+          <h3 class="skills-group-title">Theory</h3>
+          <ul class="chip-list">
+            <li class="chip">User research</li>
+            <li class="chip">Wireframing</li>
+            <li class="chip">Design systems</li>
+            <li class="chip">Accessibility basics</li>
+            <li class="chip">User testing / prototyping</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIAL -->
+  <section class="testimonial" id="testimonial">
+    <div class="section-inner testimonial-inner">
+      <p class="eyebrow reveal" data-reveal>— kind words</p>
+      <svg class="doodle doodle-quote reveal" data-reveal viewBox="0 0 52 34" aria-hidden="true"><use href="#doodle-quote" /></svg>
+      <blockquote class="testimonial-quote reveal" data-reveal>
+        “Jack is the kind of person who brings a good <em>energy</em> to every project. He’s thoughtful, easy to work with, and always willing to help make an idea better.”
+      </blockquote>
+      <p class="testimonial-attribution reveal" data-reveal>
+        Rens Koster <span class="attribution-role">— Ex-colleague, Brandium</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <div class="section-inner contact-inner">
+      <p class="eyebrow eyebrow-light reveal" data-reveal>— let's talk</p>
+      <h2 class="section-title section-title-light contact-title reveal" data-reveal>
+        Got an internship, a project,
+        <span class="underline-wrap">or just want to say hi?
+          <svg class="doodle doodle-underline sketch-draw" viewBox="0 0 120 12" preserveAspectRatio="none" aria-hidden="true"><use href="#doodle-underline" /></svg>
+        </span>
+      </h2>
+      <p class="contact-sub reveal" data-reveal>
+        I'm currently looking for internship and junior design opportunities for 2027, and I
+        love talking about any project, big or small. So let's talk!
+      </p>
+      <a class="btn btn-primary btn-large reveal" data-reveal href="mailto:jack@whitehead.nl">
+        jack@whitehead.nl
+        <svg class="doodle doodle-cta-arrow" viewBox="0 0 84 58" aria-hidden="true">
+          <use href="#doodle-arrow-curve" /><use href="#doodle-arrow-head" />
+        </svg>
+      </a>
+      <p class="contact-note reveal" data-reveal>Open to remote &amp; in-person opportunities</p>
+
+      <svg class="doodle doodle-hero-star-1 float-doodle contact-star" viewBox="0 0 40 28" aria-hidden="true"><use href="#doodle-star" /></svg>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="section-inner footer-inner">
+    <a href="#top" class="back-to-top">
+      back to top
+      <svg class="doodle doodle-back-to-top" viewBox="0 0 24 56" aria-hidden="true"><use href="#doodle-squiggle-arrow-down" /></svg>
+    </a>
+    <p class="footer-copy">Jack Whitehead © 2026</p>
+  </div>
+</footer>
+
+<!-- Project detail modal -->
+<div class="modal-backdrop" id="modal-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" id="modal">
+    <button class="modal-close" id="modal-close" aria-label="Close project details">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="4" y1="4" x2="20" y2="20"/><line x1="20" y1="4" x2="4" y2="20"/></svg>
+    </button>
+    <p class="modal-tag" id="modal-tag"></p>
+    <h3 class="modal-title" id="modal-title"></h3>
+    <p class="modal-desc" id="modal-desc"></p>
+    <div class="modal-meta">
+      <div>
+        <span class="modal-meta-label">Role</span>
+        <span class="modal-meta-value" id="modal-role"></span>
+      </div>
+      <div>
+        <span class="modal-meta-label">Tools</span>
+        <span class="modal-meta-value" id="modal-tools"></span>
+      </div>
+    </div>
+    <div class="modal-learned">
+      <span class="modal-meta-label">What I'd do differently</span>
+      <p id="modal-learned"></p>
+    </div>
+  </div>
+</div>
+
+<script src="js/main.js?v=6"></script>
+</body>
+</html>
