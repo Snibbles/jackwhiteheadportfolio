@@ -403,11 +403,9 @@ a.header-cta {
   position: relative;
   border-radius: 26px;
   border: 3px solid var(--paper);
-  background: linear-gradient(155deg, var(--coral) 0%, var(--cobalt) 100%);
   overflow: hidden;
   transform: rotate(-3deg);
   box-shadow: 0 26px 50px -14px rgba(0, 0, 0, 0.6), 0 10px 22px -10px rgba(0, 0, 0, 0.45);
-  padding: 14px 14px 0;
 }
 .hero-photo-img {
   display: block;
