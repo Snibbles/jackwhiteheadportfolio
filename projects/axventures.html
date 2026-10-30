@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Axventures — Jack Whitehead</title>
+<meta name="description" content="Website design and animation for Axventures, a mental health coaching practice. A project by Jack Whitehead.">
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="icon" href="../favicon-16x16.png" type="image/png" sizes="16x16">
+<link rel="icon" href="../favicon-32x32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="../icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=16">
+<link rel="stylesheet" href="../css/v2.css?v=17">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+</head>
+<body class="page-sub">
+
+<div id="scene3d" class="scene3d" aria-hidden="true"></div>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header scrolled" id="site-header">
+  <div class="header-inner">
+    <a class="logo" href="../index.html">
+      JW<span class="logo-dot">.</span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Primary">
+      <ul>
+        <li><a href="../index.html#about" class="nav-link">About</a></li>
+        <li><a href="../projects.html" class="nav-link active">Work</a></li>
+        <li><a href="../index.html#skills" class="nav-link">Skills</a></li>
+        <li><a href="../index.html#contact" class="nav-link">Contact</a></li>
+      </ul>
+      <span class="nav-indicator" id="nav-indicator" aria-hidden="true"></span>
+    </nav>
+    <a class="btn btn-small header-cta" href="../index.html#contact">Say hello</a>
+    <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobile-menu">
+  <ul>
+    <li><a href="../index.html#about" class="mobile-link">About</a></li>
+    <li><a href="../projects.html" class="mobile-link">Work</a></li>
+    <li><a href="../index.html#skills" class="mobile-link">Skills</a></li>
+    <li><a href="../index.html#contact" class="mobile-link">Contact</a></li>
+  </ul>
+</div>
+
+<main id="main">
+  <section class="project-hero">
+    <div class="section-inner project-hero-inner">
+      <a class="back-link" href="../projects.html">← All projects</a>
+      <p class="eyebrow eyebrow-hero">UX/UI · Website</p>
+      <h1 class="project-title">Axventures</h1>
+      <p class="project-summary">A modern website for Axventures, a mental health coaching practice. We designed and coded it as a duo, with expressive micro-interactions that bring the page to life.</p>
+      <dl class="project-meta">
+      <div><dt>Role</dt><dd>Research, UX &amp; UI</dd></div>
+      <div><dt>Team</dt><dd>Duo</dd></div>
+      <div><dt>For</dt><dd>A client project</dd></div>
+      <div><dt>Tools</dt><dd>Figma, HTML/CSS, Illustrator</dd></div>
+      </dl>
+      <div class="project-cover">
+        <img src="../images/projects/axventures/cover.jpg" alt="Three frames of an animated Axventures page: a pink title block, the dark header and the intro text" width="1800" height="1179">
+      </div>
+    </div>
+  </section>
+
+  <section class="project-block">
+    <div class="section-inner">
+      <div class="project-block-head">
+        <p class="eyebrow reveal" data-reveal>the motion</p>
+        <h2 class="section-title reveal" data-reveal>A page that settles into place.</h2>
+        <p class="project-text reveal" data-reveal>A short animation shows the services page (&quot;Aanbod&quot;) coming together: the pink title block fills in, turns into the dark header with the menu, then shrinks to make room for the intro text.</p>
+      </div>
+      <div class="project-duo">
+        <figure class="shot shot-portrait" data-reveal>
+            <div class="shot-media">
+              <video src="../images/projects/axventures/axventures.mp4" poster="../images/projects/axventures/axventures-poster.jpg" width="720" height="1572" controls playsinline preload="none" aria-label="Animation of the Axventures services page"></video>
+            </div>
+            <figcaption>The animation, 4 seconds, made in Jitter.</figcaption>
+          </figure>
+        <figure class="shot " data-reveal>
+            <div class="shot-media"><img src="../images/projects/axventures/filmstrip.jpg" alt="Four frames of the Axventures services page animation" width="2000" height="935" loading="lazy"></div>
+            <figcaption>Four frames from the animation.</figcaption>
+          </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="project-block project-block-alt">
+    <div class="section-inner">
+      <div class="project-block-head">
+        <p class="eyebrow reveal" data-reveal>looking back</p>
+        <h2 class="section-title reveal" data-reveal>What I took away.</h2>
+        <p class="project-text reveal" data-reveal>The landscape of design is changing so fast. At the moment there are many tools that can make wonderful animations and save a lot of time.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="next-project">
+    <div class="section-inner">
+      <div>
+        <p class="eyebrow eyebrow-light">next up</p>
+        <a class="next-link" href="bolscout.html"><span>Bolscout</span><span aria-hidden="true">→</span></a>
+      </div>
+      <a class="btn btn-ghost" href="../projects.html">All projects</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="section-inner footer-inner">
+    <a href="#top" class="back-to-top">
+      back to top
+    </a>
+    <p class="footer-copy">Jack Whitehead © 2026</p>
+  </div>
+</footer>
+
+<script src="../js/main.js?v=10"></script>
+<script type="module" src="../js/scene3d.js?v=13"></script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Walkwise — Jack Whitehead</title>
+<meta name="description" content="A multi-device walking app connecting movement and mental wellbeing. A self-directed project by Jack Whitehead.">
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="icon" href="../favicon-16x16.png" type="image/png" sizes="16x16">
+<link rel="icon" href="../favicon-32x32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="../icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=16">
+<link rel="stylesheet" href="../css/v2.css?v=17">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+</head>
+<body class="page-sub">
+
+<div id="scene3d" class="scene3d" aria-hidden="true"></div>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header scrolled" id="site-header">
+  <div class="header-inner">
+    <a class="logo" href="../index.html">
+      JW<span class="logo-dot">.</span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Primary">
+      <ul>
+        <li><a href="../index.html#about" class="nav-link">About</a></li>
+        <li><a href="../projects.html" class="nav-link active">Work</a></li>
+        <li><a href="../index.html#skills" class="nav-link">Skills</a></li>
+        <li><a href="../index.html#contact" class="nav-link">Contact</a></li>
+      </ul>
+      <span class="nav-indicator" id="nav-indicator" aria-hidden="true"></span>
+    </nav>
+    <a class="btn btn-small header-cta" href="../index.html#contact">Say hello</a>
+    <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobile-menu">
+  <ul>
+    <li><a href="../index.html#about" class="mobile-link">About</a></li>
+    <li><a href="../projects.html" class="mobile-link">Work</a></li>
+    <li><a href="../index.html#skills" class="mobile-link">Skills</a></li>
+    <li><a href="../index.html#contact" class="mobile-link">Contact</a></li>
+  </ul>
+</div>
+
+<main id="main">
+  <section class="project-hero">
+    <div class="section-inner project-hero-inner">
+      <a class="back-link" href="../projects.html">← All projects</a>
+      <p class="eyebrow eyebrow-hero">Interaction · Prototype</p>
+      <h1 class="project-title">Walkwise</h1>
+      <p class="project-summary">Walkwise is a walking app that connects movement and mental wellbeing. It works with your smartwatch and turns daily goals into a streak, guided by a playful mascot. I designed and directed it on my own, from UX and UI to the prototype.</p>
+      <dl class="project-meta">
+      <div><dt>Role</dt><dd>UX / UI, interaction design, prototyping</dd></div>
+      <div><dt>Team</dt><dd>Solo</dd></div>
+      <div><dt>For</dt><dd>A self-directed project</dd></div>
+      <div><dt>Tools</dt><dd>Figma</dd></div>
+      </dl>
+      <div class="project-cover">
+        <img src="../images/projects/walkwise/cover.jpg" alt="Four Walkwise app screens on a dark background: home, goals, profile and routes" width="1800" height="1179">
+      </div>
+    </div>
+  </section>
+
+  <section class="project-block">
+    <div class="section-inner">
+      <div class="project-block-head">
+        <p class="eyebrow reveal" data-reveal>the flow</p>
+        <h2 class="section-title reveal" data-reveal>From first connection to the finished walk.</h2>
+        <p class="project-text reveal" data-reveal>The prototype covers the whole journey: connecting a smartwatch, choosing what to track, finding a route, walking it and looking back at the day.</p>
+      </div>
+      <div class="shot-stack">
+        <figure class="shot " data-reveal>
+            <div class="shot-media"><img src="../images/projects/walkwise/flow.jpg" alt="Walkwise screen flow: onboarding, home, routes, goals and profile" width="1852" height="1620" loading="lazy"></div>
+            <figcaption>The full screen flow in Figma.</figcaption>
+          </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="project-block project-block-alt">
+    <div class="section-inner">
+      <div class="project-block-head">
+        <p class="eyebrow reveal" data-reveal>the details</p>
+        <h2 class="section-title reveal" data-reveal>A mascot that keeps count.</h2>
+        <p class="project-text reveal" data-reveal>A bearded walker guides you through the app. He cheers you on at the home screen and the goals screen, where your streak shows as one flame per day.</p>
+      </div>
+      <div class="shot-stack">
+        <div class="shot-pair">
+          <figure class="shot " data-reveal>
+            <div class="shot-media"><img src="../images/projects/walkwise/goals-profile.jpg" alt="Walkwise goals and profile screens" width="552" height="790" loading="lazy"></div>
+            <figcaption>Goals and profile: a daily target, a streak and weekly insights.</figcaption>
+          </figure>
+          <figure class="shot " data-reveal>
+            <div class="shot-media"><img src="../images/projects/walkwise/the-walk.jpg" alt="Walkwise map screens while walking" width="820" height="980" loading="lazy"></div>
+            <figcaption>On the walk: distance, steps and time, with the route on the map.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="project-block">
+    <div class="section-inner">
+      <div class="project-block-head">
+        <p class="eyebrow reveal" data-reveal>looking back</p>
+        <h2 class="section-title reveal" data-reveal>What I&#x27;d do differently.</h2>
+        <p class="project-text reveal" data-reveal>I&#x27;d look at how the experience could become more personalised to different motivations for walking.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="next-project">
+    <div class="section-inner">
+      <div>
+        <p class="eyebrow eyebrow-light">next up</p>
+        <a class="next-link" href="buckfiets.html"><span>Buckfiets</span><span aria-hidden="true">→</span></a>
+      </div>
+      <a class="btn btn-ghost" href="../projects.html">All projects</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="section-inner footer-inner">
+    <a href="#top" class="back-to-top">
+      back to top
+    </a>
+    <p class="footer-copy">Jack Whitehead © 2026</p>
+  </div>
+</footer>
+
+<script src="../js/main.js?v=10"></script>
+<script type="module" src="../js/scene3d.js?v=13"></script>
+</body>
+</html>

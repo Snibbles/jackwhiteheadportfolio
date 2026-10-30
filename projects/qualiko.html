@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qualiko Recipe Book — Jack Whitehead</title>
+<meta name="description" content="A 50-recipe cookbook for a chicken manufacturer, balancing clear information with an editorial style. A project by Jack Whitehead.">
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="icon" href="../favicon-16x16.png" type="image/png" sizes="16x16">
+<link rel="icon" href="../favicon-32x32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="../icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=16">
+<link rel="stylesheet" href="../css/v2.css?v=17">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+</head>
+<body class="page-sub">
+
+<div id="scene3d" class="scene3d" aria-hidden="true"></div>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header scrolled" id="site-header">
+  <div class="header-inner">
+    <a class="logo" href="../index.html">
+      JW<span class="logo-dot">.</span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Primary">
+      <ul>
+        <li><a href="../index.html#about" class="nav-link">About</a></li>
+        <li><a href="../projects.html" class="nav-link active">Work</a></li>
+        <li><a href="../index.html#skills" class="nav-link">Skills</a></li>
+        <li><a href="../index.html#contact" class="nav-link">Contact</a></li>
+      </ul>
+      <span class="nav-indicator" id="nav-indicator" aria-hidden="true"></span>
+    </nav>
+    <a class="btn btn-small header-cta" href="../index.html#contact">Say hello</a>
+    <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobile-menu">
+  <ul>
+    <li><a href="../index.html#about" class="mobile-link">About</a></li>
+    <li><a href="../projects.html" class="mobile-link">Work</a></li>
+    <li><a href="../index.html#skills" class="mobile-link">Skills</a></li>
+    <li><a href="../index.html#contact" class="mobile-link">Contact</a></li>
+  </ul>
+</div>
+
+<main id="main">
+  <section class="project-hero">
+    <div class="section-inner project-hero-inner">
+      <a class="back-link" href="../projects.html">← All projects</a>
+      <p class="eyebrow eyebrow-hero">Branding · Digital Design</p>
+      <h1 class="project-title">Qualiko Recipe Book</h1>
+      <p class="project-summary">A 50-recipe publication for a large-scale chicken manufacturer, balancing clear information with an engaging editorial style. We designed the layout and the brand identity as a duo.</p>
+      <dl class="project-meta">
+      <div><dt>Role</dt><dd>Digital design, brand identity</dd></div>
+      <div><dt>Team</dt><dd>Duo</dd></div>
+      <div><dt>For</dt><dd>A client project</dd></div>
+      <div><dt>Tools</dt><dd>Illustrator</dd></div>
+      </dl>
+      <div class="project-cover">
+        <img src="../images/projects/qualiko/cover.jpg" alt="Two spreads from the Qualiko recipe book: a Wok Crispers recipe and the cover" width="1800" height="1179">
+      </div>
+    </div>
+  </section>
+
+  <section class="project-block">
+    <div class="section-inner">
+      <div class="project-block-head">
+        <p class="eyebrow reveal" data-reveal>a recipe page</p>
+        <h2 class="section-title reveal" data-reveal>One spread per dish.</h2>
+        <p class="project-text reveal" data-reveal>Every recipe gets the same page: the dish photo, servings and cooking time, ingredients grouped by component, and numbered steps with both deep-fry and air-fry times.</p>
+        <ul class="project-points reveal" data-reveal>
+          <li>A QR code on the photo links to the recipe video.</li>
+          <li>A profitability box lets a kitchen fill in cost, sale price and profit per serving.</li>
+          <li>A chef&#x27;s tip sits next to the Qualiko pack the dish is made with.</li>
+        </ul>
+      </div>
+      <div class="shot-stack">
+        <figure class="shot " data-reveal>
+            <div class="shot-media"><img src="../images/projects/qualiko/spread-wok-crispers.jpg" alt="Qualiko recipe spread for Wok Crispers with stir-fried greens" width="2000" height="1415" loading="lazy"></div>
+            <figcaption>The Wok Crispers spread.</figcaption>
+          </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="project-block project-block-alt">
+    <div class="section-inner">
+      <div class="project-block-head">
+        <p class="eyebrow reveal" data-reveal>the system</p>
+        <h2 class="section-title reveal" data-reveal>Same grid, different dish.</h2>
+        <p class="project-text reveal" data-reveal>Across the book the layout stays put, so a cook always finds the ingredients and the steps in the same place. Only the photo and the product pack change.</p>
+      </div>
+      <div class="shot-stack">
+        <div class="shot-pair">
+          <figure class="shot " data-reveal>
+            <div class="shot-media"><img src="../images/projects/qualiko/spread-golden-nuggets.jpg" alt="Qualiko recipe spread for Golden Nuggets Premier" width="1500" height="1061" loading="lazy"></div>
+            <figcaption>Golden Nuggets Premier.</figcaption>
+          </figure>
+          <figure class="shot " data-reveal>
+            <div class="shot-media"><img src="../images/projects/qualiko/spread-bbq-wings.jpg" alt="Qualiko recipe spread for Sweet and Smokey BBQ Wings" width="1500" height="1061" loading="lazy"></div>
+            <figcaption>Sweet and Smokey BBQ Wings.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="project-block">
+    <div class="section-inner">
+      <div class="project-block-head">
+        <p class="eyebrow reveal" data-reveal>the cover</p>
+        <h2 class="section-title reveal" data-reveal>A book for the kitchen.</h2>
+        <p class="project-text reveal" data-reveal>The opening spread pairs a chef at work with a short note telling chefs and kitchen teams the book is meant to be used, not just read.</p>
+      </div>
+      <div class="shot-stack">
+        <figure class="shot " data-reveal>
+            <div class="shot-media"><img src="../images/projects/qualiko/spread-cover.jpg" alt="Qualiko recipe book cover spread with a chef preparing a dish" width="1220" height="856" loading="lazy"></div>
+            <figcaption>The cover and the opening note.</figcaption>
+          </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="project-block project-block-alt">
+    <div class="section-inner">
+      <div class="project-block-head">
+        <p class="eyebrow reveal" data-reveal>looking back</p>
+        <h2 class="section-title reveal" data-reveal>What I&#x27;d do differently.</h2>
+        <p class="project-text reveal" data-reveal>I&#x27;d find more ways to create variation within the visual system, while still sticking to the design norms of a recipe book.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="next-project">
+    <div class="section-inner">
+      <div>
+        <p class="eyebrow eyebrow-light">next up</p>
+        <a class="next-link" href="walkwise.html"><span>Walkwise</span><span aria-hidden="true">→</span></a>
+      </div>
+      <a class="btn btn-ghost" href="../projects.html">All projects</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="section-inner footer-inner">
+    <a href="#top" class="back-to-top">
+      back to top
+    </a>
+    <p class="footer-copy">Jack Whitehead © 2026</p>
+  </div>
+</footer>
+
+<script src="../js/main.js?v=10"></script>
+<script type="module" src="../js/scene3d.js?v=13"></script>
+</body>
+</html>
