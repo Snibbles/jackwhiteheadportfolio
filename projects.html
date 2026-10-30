@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All projects — Jack Whitehead</title>
+<meta name="description" content="Everything Jack Whitehead has made: recent work from Klein Media and earlier design projects.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-16x16.png" type="image/png" sizes="16x16">
+<link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=16">
+<link rel="stylesheet" href="css/v2.css?v=17">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+</head>
+<body class="page-sub">
+
+<div id="scene3d" class="scene3d" aria-hidden="true"></div>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header scrolled" id="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html">
+      JW<span class="logo-dot">.</span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Primary">
+      <ul>
+        <li><a href="index.html#about" class="nav-link">About</a></li>
+        <li><a href="projects.html" class="nav-link active">Work</a></li>
+        <li><a href="index.html#skills" class="nav-link">Skills</a></li>
+        <li><a href="index.html#contact" class="nav-link">Contact</a></li>
+      </ul>
+      <span class="nav-indicator" id="nav-indicator" aria-hidden="true"></span>
+    </nav>
+    <a class="btn btn-small header-cta" href="index.html#contact">Say hello</a>
+    <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobile-menu">
+  <ul>
+    <li><a href="index.html#about" class="mobile-link">About</a></li>
+    <li><a href="projects.html" class="mobile-link">Work</a></li>
+    <li><a href="index.html#skills" class="mobile-link">Skills</a></li>
+    <li><a href="index.html#contact" class="mobile-link">Contact</a></li>
+  </ul>
+</div>
+
+<main id="main">
+  <section class="work projects-index" id="work">
+    <div class="section-inner">
+      <a class="back-link back-link-dark" href="index.html">← Home</a>
+      <p class="eyebrow reveal" data-reveal>all work</p>
+      <h1 class="section-title reveal" data-reveal>Everything I've made</h1>
+      <p class="section-sub reveal" data-reveal>
+        The newest work comes first.
+        Tap a card for the full story.
+      </p>
+
+      <div class="work-grid">
+
+        <a class="work-card work-card-link reveal" data-reveal href="projects/buckfiets.html" style="--tilt:-2deg">
+          <span class="work-card-visual work-visual-1">
+            <img
+              src="images/projects/buckfiets/cover-card.jpg"
+              alt="The Buckfiets landing page on a laptop and a phone, on an orange background"
+              class="work-card-visual-img work-card-visual-img-fit"
+              width="1200" height="786"
+              loading="lazy"
+            >
+          </span>
+          <span class="work-card-body">
+            <span class="work-card-tag">Web · Print · Motion</span>
+            <span class="work-card-title">Buckfiets</span>
+            <span class="work-card-desc">A landing page, flyers and saddle covers for a startup that pays cargo-bike owners to carry ads</span>
+          </span>
+        </a>
+
+        <a class="work-card work-card-link reveal" data-reveal href="projects/coravin.html" style="--tilt:1.5deg">
+          <span class="work-card-visual work-visual-2">
+            <img
+              src="images/projects/coravin/cover-card.jpg"
+              alt="Three vertical Coravin video frames: a wine pour with a title, champagne being opened, and a gift being wrapped"
+              class="work-card-visual-img work-card-visual-img-fit"
+              width="1200" height="786"
+              loading="lazy"
+            >
+          </span>
+          <span class="work-card-body">
+            <span class="work-card-tag">Video · Edit &amp; sound</span>
+            <span class="work-card-title">Coravin</span>
+            <span class="work-card-desc">Vertical social videos for Coravin, edited from a brief by Butterfly Studio</span>
+          </span>
+        </a>
+
+        <a class="work-card work-card-link reveal" data-reveal href="projects/projects-amsterdam.html" style="--tilt:-1.5deg">
+          <span class="work-card-visual work-visual-3">
+            <img
+              src="images/projects/projects-amsterdam/cover-card.jpg"
+              alt="Two browser windows showing the Projects Amsterdam kitchen and bathroom pages"
+              class="work-card-visual-img work-card-visual-img-fit"
+              width="1200" height="786"
+              loading="lazy"
+            >
+          </span>
+          <span class="work-card-body">
+            <span class="work-card-tag">Web design</span>
+            <span class="work-card-title">Projects Amsterdam</span>
+            <span class="work-card-desc">Website pages for an Amsterdam renovation and interiors firm, built around their photography</span>
+          </span>
+        </a>
+
+        <a class="work-card work-card-link reveal" data-reveal href="projects/seo.html" style="--tilt:2deg">
+          <span class="work-card-visual work-visual-4">
+            <img
+              src="images/projects/seo/cover-card.jpg"
+              alt="A Google Sheets dashboard and a scored list of link prospects"
+              class="work-card-visual-img work-card-visual-img-fit"
+              width="1200" height="786"
+              loading="lazy"
+            >
+          </span>
+          <span class="work-card-body">
+            <span class="work-card-tag">SEO · Automation</span>
+            <span class="work-card-title">SEO link-building tool</span>
+            <span class="work-card-desc">A Google Sheets tool that finds, scores and tracks link-building prospects for clients</span>
+          </span>
+        </a>
+
+        <a class="work-card work-card-link reveal" data-reveal href="projects/axventures.html" style="--tilt:-2deg">
+          <span class="work-card-visual work-visual-5">
+            <img
+              src="images/projects/axventures/cover-card.jpg"
+              alt="Three frames of an animated Axventures page: a pink title block, the dark header and the intro text"
+              class="work-card-visual-img work-card-visual-img-fit"
+              width="1200" height="786"
+              loading="lazy"
+            >
+          </span>
+          <span class="work-card-body">
+            <span class="work-card-tag">UX/UI · Website</span>
+            <span class="work-card-title">Axventures</span>
+            <span class="work-card-desc">A modern mental health coaching site brought to life with expressive motion</span>
+          </span>
+        </a>
+
+        <a class="work-card work-card-link reveal" data-reveal href="projects/bolscout.html" style="--tilt:1.5deg">
+          <span class="work-card-visual work-visual-6">
+            <img
+              src="images/projects/bolscout/cover-card.jpg"
+              alt="The Bolscout dashboard in two browser windows: six key numbers, a line chart and a bar chart"
+              class="work-card-visual-img work-card-visual-img-fit"
+              width="1200" height="786"
+              loading="lazy"
+            >
+          </span>
+          <span class="work-card-body">
+            <span class="work-card-tag">Product Design · UI / Data Viz</span>
+            <span class="work-card-title">Bolscout</span>
+            <span class="work-card-desc">A financial management interface designed to make complex information clear</span>
+          </span>
+        </a>
+
+        <a class="work-card work-card-link reveal" data-reveal href="projects/qualiko.html" style="--tilt:2deg">
+          <span class="work-card-visual work-visual-7">
+            <img
+              src="images/projects/qualiko/cover-card.jpg"
+              alt="Two spreads from the Qualiko recipe book: a Wok Crispers recipe and the cover"
+              class="work-card-visual-img work-card-visual-img-fit"
+              width="1200" height="786"
+              loading="lazy"
+            >
+          </span>
+          <span class="work-card-body">
+            <span class="work-card-tag">Branding · Digital Design</span>
+            <span class="work-card-title">Qualiko Recipe Book</span>
+            <span class="work-card-desc">An extensive recipe book featuring 50 recipes, designed for a leading chicken manufacturer</span>
+          </span>
+        </a>
+
+        <a class="work-card work-card-link reveal" data-reveal href="projects/walkwise.html" style="--tilt:-1.5deg">
+          <span class="work-card-visual work-visual-8">
+            <img
+              src="images/projects/walkwise/cover-card.jpg"
+              alt="Four Walkwise app screens on a dark background: home, goals, profile and routes"
+              class="work-card-visual-img work-card-visual-img-fit"
+              width="1200" height="786"
+              loading="lazy"
+            >
+          </span>
+          <span class="work-card-body">
+            <span class="work-card-tag">Interaction · Prototype</span>
+            <span class="work-card-title">Walkwise</span>
+            <span class="work-card-desc">Designed a multi-device app connecting walking and mental wellbeing through playful branding and daily goals</span>
+          </span>
+        </a>
+
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="section-inner footer-inner">
+    <a href="#top" class="back-to-top">
+      back to top
+    </a>
+    <p class="footer-copy">Jack Whitehead © 2026</p>
+  </div>
+</footer>
+
+<script src="js/main.js?v=10"></script>
+<script type="module" src="js/scene3d.js?v=13"></script>
+</body>
+</html>
