@@ -18,6 +18,7 @@
     { threshold: [0, 0.6] }
   );
   if (hero) headerObserver.observe(hero);
+  else header.classList.add("scrolled");
 
   /* ----------------------------------------------------------
      Mobile menu toggle
@@ -162,157 +163,42 @@
     if (active) moveIndicatorTo(active);
   });
 
-  /* ----------------------------------------------------------
-     Project modal
-  ---------------------------------------------------------- */
-  const projects = [
-    {
-      tag: "UX/UI · Website · Project for client",
-      title: "Axventures",
-      desc: "Designed and coded a modern mental health coaching website, brought to life with expressive micro-interactions.",
-      role: "Duo team — research, UX, UI",
-      tools: "Figma, HTML/CSS, Illustrator",
-      learned: "The landscape of design is changing so fast, I think at that at the moment there are many tools that can make wonderful animations and save a lot of time.",
-    },
-    {
-      tag: "Product Design · UI / Data visualisation · Project for client",
-      title: "Bolscout",
-      desc: "A financial management interface designed to make complex information clear. Sellers on Bol.com get one dashboard for revenue, costs, profit, and per-product performance instead of digging through spreadsheets.",
-      role: "Duo team — product design, data viz",
-      tools: "Lots of Figma, illustrator for graphics",
-      learned: "I'd research more ways to simplify complex financial information without losing depth.",
-    },
-    {
-      tag: "Branding · Digital Design · Project for client",
-      title: "Qualiko Recipe Book",
-      desc: "A 50-recipe publication for a large-scale chicken manufacturer, balancing clear information with an engaging editorial style.",
-      role: "Duo team — Digital design, Brand identity",
-      tools: "Illustrator",
-      learned: "More ways to create variation within the visual system, while still sticking to the design norms when it comes to the format of a recipe book.",
-    },
-    {
-      tag: "Interaction · Prototype · Self-directed project",
-      title: "Walkwise",
-      desc: "Designed and directed Walkwise, a multi-device walking app connecting movement and mental wellbeing through daily goals, a playful mascot and clear branding.",
-      role: "Solo — UX / UI, interaction design, prototyping",
-      tools: "Figma",
-      learned: "How the experience could become more personalised to different motivations for walking.",
-    },
-  ];
-
-  const modalBackdrop = document.getElementById("modal-backdrop");
-  const modalCloseBtn = document.getElementById("modal-close");
-  const modalTag = document.getElementById("modal-tag");
-  const modalTitle = document.getElementById("modal-title");
-  const modalDesc = document.getElementById("modal-desc");
-  const modalRole = document.getElementById("modal-role");
-  const modalTools = document.getElementById("modal-tools");
-  const modalLearned = document.getElementById("modal-learned");
-
-  let lastFocusedEl = null;
-
-  function openModal(index) {
-    const p = projects[index];
-    if (!p) return;
-    modalTag.textContent = p.tag;
-    modalTitle.textContent = p.title;
-    modalDesc.textContent = p.desc;
-    modalRole.textContent = p.role;
-    modalTools.textContent = p.tools;
-    modalLearned.textContent = p.learned;
-
-    lastFocusedEl = document.activeElement;
-    modalBackdrop.hidden = false;
-    requestAnimationFrame(() => modalBackdrop.classList.add("open"));
-    document.body.style.overflow = "hidden";
-    modalCloseBtn.focus();
+  // pages that mark their own link (Work) as active: place the marker once fonts have loaded
+  const preActive = document.querySelector(".nav-link.active");
+  if (preActive) {
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => moveIndicatorTo(preActive));
+    else moveIndicatorTo(preActive);
   }
 
-  function closeModal() {
-    modalBackdrop.classList.remove("open");
-    document.body.style.overflow = "";
-    setTimeout(() => {
-      modalBackdrop.hidden = true;
-    }, 300);
-    if (lastFocusedEl) lastFocusedEl.focus();
-  }
-
-  document.querySelectorAll(".work-card-trigger").forEach((trigger) => {
-    trigger.addEventListener("click", () => {
-      const index = Number(trigger.getAttribute("data-project"));
-      openModal(index);
-    });
-  });
-
-  modalCloseBtn.addEventListener("click", closeModal);
-  modalBackdrop.addEventListener("click", (e) => {
-    if (e.target === modalBackdrop) closeModal();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !modalBackdrop.hidden) closeModal();
-  });
-
   /* ----------------------------------------------------------
-     Work card video preview
-     Idle state is frozen on the last frame. Short single-keyframe
-     clips often can't be seeked directly to the end, so instead we
-     silently play the clip through once (muted, hidden) on load —
-     it naturally comes to rest on the last frame — then reveal it.
+     Looping demo clips: play while on screen, pause when not.
+     With reduced motion they stay paused and show controls.
   ---------------------------------------------------------- */
-  document.querySelectorAll(".work-card-play").forEach((playBtn) => {
-    const visual = playBtn.closest(".work-card-visual");
-    const video = visual.querySelector(".work-card-video-el");
-    if (!video) return;
-
-    let revealed = false;
-    const reveal = () => {
-      revealed = true;
-      visual.classList.add("is-ready");
-    };
-
-    // Some short clips stall just shy of their reported duration and
-    // never fire `ended` — settle the idle/playing state on a timer too.
-    const settle = () => {
-      video.pause();
-      reveal();
-      if (visual.classList.contains("is-playing")) {
-        video.removeAttribute("controls");
-        visual.classList.remove("is-playing");
-      }
-    };
-    const armSettleFallback = () => {
-      const ms = (Number.isFinite(video.duration) ? video.duration : 5) * 1000 + 700;
-      setTimeout(() => {
-        if (!video.ended && (!revealed || visual.classList.contains("is-playing"))) settle();
-      }, ms);
-    };
-
-    const primeThumbnail = () => {
-      video.muted = true;
-      const playPromise = video.play();
-      if (playPromise && playPromise.catch) playPromise.catch(reveal);
-      armSettleFallback();
-    };
-
-    if (video.readyState >= 3) {
-      primeThumbnail();
+  const loopVideos = document.querySelectorAll("video[data-loop]");
+  if (loopVideos.length) {
+    if (prefersReducedMotion) {
+      loopVideos.forEach((v) => v.setAttribute("controls", ""));
     } else {
-      video.addEventListener("canplay", primeThumbnail, { once: true });
+      const loopObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const v = entry.target;
+            if (entry.isIntersecting) {
+              const playing = v.play();
+              if (playing && playing.catch) playing.catch(() => {});
+            } else {
+              v.pause();
+            }
+          });
+        },
+        { threshold: 0.4 }
+      );
+      loopVideos.forEach((v) => {
+        v.preload = "metadata";
+        loopObserver.observe(v);
+      });
     }
-
-    video.addEventListener("ended", settle);
-
-    playBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      reveal();
-      video.muted = false;
-      video.currentTime = 0;
-      video.play();
-      visual.classList.add("is-playing");
-      video.setAttribute("controls", "");
-      armSettleFallback();
-    });
-  });
+  }
 
   /* ----------------------------------------------------------
      Smooth anchor scroll with header offset
@@ -330,4 +216,23 @@
       history.pushState(null, "", targetId);
     });
   });
+})();
+
+/* ----------------------------------------------------------
+   About: the crew card tilts toward the pointer (skipped for touch and reduced motion)
+---------------------------------------------------------- */
+(() => {
+  const crew = document.querySelector(".crew");
+  if (!crew) return;
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (still) return;
+  if (!window.matchMedia("(hover: hover)").matches) return;
+  const card = crew.querySelector(".crew-card");
+  crew.addEventListener("pointermove", (e) => {
+    const r = crew.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+    card.style.setProperty("--ry", (x * 9).toFixed(2) + "deg");
+    card.style.setProperty("--rx", (-y * 7).toFixed(2) + "deg");
+  });
+  crew.addEventListener("pointerleave", () => { card.style.setProperty("--rx", "0deg"); card.style.setProperty("--ry", "0deg"); });
 })();
