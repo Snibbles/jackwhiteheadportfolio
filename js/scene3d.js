@@ -15,12 +15,15 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
   const meterTxt = document.getElementById('launch-text');
   const replayBtn = document.getElementById('replay-landing');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // the landing plays once per visit; coming back (or arriving on a link like /#contact) shows the head already landed
+  let skipIntro = root.classList.contains('skip-intro');
 
   function fallback() {
     root.classList.remove('has-3d', 'boot'); root.classList.add('no-3d');
     if (hero) hero.classList.remove('hero-wait');
     if (meter) meter.remove();
     if (host) host.remove();
+    window.dispatchEvent(new CustomEvent('hero:landed'));
   }
 
   let renderer;
@@ -272,17 +275,26 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
   starList.forEach((q, i) => { starPos.set([q[0], q[1], 0], i * 3); starAtt.set([q[2], q[3], q[4], q[5]], i * 4); });
   const starGeo = new THREE.BufferGeometry();
   starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3)); starGeo.setAttribute('aS', new THREE.BufferAttribute(starAtt, 4));
+  // warp: when the page moves fast (a nav jump, a flick on a phone), every star smears along its path like a long exposure.
+  // Nearer layers (more parallax) smear more. At reading speed nothing changes.
+  const WARP = { uWarp: { value: 0 }, uMaxPt: { value: 64 } };
+  try { const gl = renderer.getContext(), r = gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE); if (r && r[1]) WARP.uMaxPt.value = Math.min(r[1], 256); } catch (e) {}
   const stars = new THREE.Points(starGeo, new THREE.ShaderMaterial({
-    uniforms: { uRes: BGU.uRes, uDpr: BGU.uDpr, uScroll: BGU.uScroll, uTime: BGU.uTime }, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending,
-    vertexShader: `uniform vec2 uRes; uniform float uDpr, uScroll, uTime; attribute vec4 aS; varying vec3 vC;
+    uniforms: { uRes: BGU.uRes, uDpr: BGU.uDpr, uScroll: BGU.uScroll, uTime: BGU.uTime, ...WARP }, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: `uniform vec2 uRes; uniform float uDpr, uScroll, uTime, uWarp, uMaxPt; attribute vec4 aS; varying vec3 vC; varying float vSt;
       void main(){
         float tileH = uRes.y * 1.12, y = mod(position.y * tileH - uScroll * aS.w, tileH);
         float tw = 0.72 + 0.28 * sin(uTime * (0.8 + 2.4 * fract(aS.y * 7.0)) + aS.y * 60.0);
-        vC = mix(vec3(0.74, 0.82, 1.0), vec3(1.0, 0.85, 0.70), aS.z) * tw;
+        float base = aS.x * 8.0 * uDpr;
+        float st = clamp(1.0 + uWarp * aS.w * uDpr / base, 1.0, max(1.0, uMaxPt / base));
+        vSt = st;
+        vC = mix(vec3(0.74, 0.82, 1.0), vec3(1.0, 0.85, 0.70), aS.z) * tw * (1.0 - 0.3 * smoothstep(1.5, 8.0, st));
         gl_Position = vec4(position.x * 2.0 - 1.0, 1.0 - 2.0 * y / uRes.y, 0.0, 1.0);
-        gl_PointSize = aS.x * 8.0 * uDpr;
+        gl_PointSize = base * st;
       }`,
-    fragmentShader: `varying vec3 vC; void main(){ float r = length(gl_PointCoord - 0.5) * 2.0; float k = (1.0 - smoothstep(0.16, 0.30, r)) + exp(-r * r * 9.0) * 0.30; gl_FragColor = vec4(vC * k, 1.0); }`
+    fragmentShader: `varying vec3 vC; varying float vSt;
+      void main(){ vec2 p = gl_PointCoord - 0.5; p.x *= vSt; float r = length(p) * 2.0;
+        float k = (1.0 - smoothstep(0.16, 0.30, r)) + exp(-r * r * 9.0) * 0.30; gl_FragColor = vec4(vC * k, 1.0); }`
   }));
   stars.frustumCulled = false; stars.renderOrder = -99; scene.add(stars);
 
@@ -682,6 +694,8 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
     let fake = 0; const fakeTimer = setInterval(() => { fake = Math.min(fake + 0.04, 0.9); if (!headReady) setMeter(Math.max(fake, 0)); }, 120);
     new GLTFLoader().load('assets/head-web.glb', g => { clearInterval(fakeTimer); setMeter(1); buildHead(g); startLaunch(); },
       x => { if (x.total) { clearInterval(fakeTimer); setMeter(Math.min(x.loaded / x.total, 0.98)); } }, () => { clearInterval(fakeTimer); fallback(); });
+    // on a very slow connection the page doesn't wait for the head: everything shows, and the head pops onto its pad when it arrives
+    setTimeout(() => { if (!launched && !skipIntro) { skipIntro = true; root.classList.add('skip-intro'); clearInterval(fakeTimer); if (meter) meter.classList.add('done'); reveal(); } }, 6000);
   } else { heroG.visible = false; backdrop.visible = false; root.classList.add('hero-landed'); }
 
   /* ---------- layout: head big on the right (desktop) / on top (phone); scroll moves the camera ---------- */
@@ -785,18 +799,20 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
   addEventListener('pointermove', e => { mouse.x = (e.clientX / window.innerWidth) * 2 - 1; mouse.y = (e.clientY / window.innerHeight) * 2 - 1; mouse.last = performance.now(); });
 
   /* ---------- timeline ---------- */
-  let launched = false, vt = 0, revealed = false;
+  let launched = false, vt = 0, revealed = false, landedStored = false, headIn = -1;
+  const easeOutBack = x => 1 + 2.2 * Math.pow(x - 1, 3) + 1.2 * Math.pow(x - 1, 2);
   function startLaunch() {
-    launched = true; poke(); vt = reduce ? 99 : 0;
+    launched = true; poke(); vt = (reduce || skipIntro) ? 99 : 0;
     if (meter) meter.classList.add('done');
-    if (reduce) reveal();
+    if (reduce || skipIntro) { reveal(); if (!reduce) headIn = performance.now(); }   // already landed: the head just pops onto its pad
   }
   function reveal() {
     if (revealed) return; revealed = true;
     root.classList.add('hero-landed'); if (hero) hero.classList.remove('hero-wait');
     window.dispatchEvent(new CustomEvent('hero:landed'));
   }
-  if (replayBtn) replayBtn.addEventListener('click', () => { if (launched && !reduce) vt = 0; });
+  if (hero && (reduce || skipIntro)) reveal();          // nobody waits for the model to download when there is no landing to watch
+  if (replayBtn) replayBtn.addEventListener('click', () => { if (launched && !reduce) { vt = 0; headIn = -1; } });
 
   function apply(T, t, dt) {
     const y = rocketY(T), tl = T - T_L, h = y;
@@ -805,6 +821,8 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
     const bounce = tl > 0 ? Math.exp(-tl * 7) * Math.cos(tl * 21) : 0;
     const stretch = tl > 0 ? 0 : 0.045 * sstep(0, 0.4, T);
     rocket.scale.set(1 + 0.10 * bounce - stretch * 0.4, 1 - 0.15 * bounce + stretch, 1 + 0.10 * bounce - stretch * 0.4);
+    if (headIn > 0) { const k = Math.min((performance.now() - headIn) / 650, 1); rocket.scale.multiplyScalar(Math.max(easeOutBack(k), 0.0001)); if (k >= 1) headIn = -1; }
+    if (!landedStored && T > T_L + 1.2) { landedStored = true; try { sessionStorage.setItem('jw-landed', '1'); } catch (e) {} }
     const fall = 1 - sstep(0, T_L, T);
     rocket.rotation.z = Math.sin(T * 7.2) * 0.11 * Math.pow(fall, 1.2) + (tl > 0 ? Math.sin(tl * 16) * 0.025 * Math.exp(-tl * 6) : 0);
     if (T < T_FOLLOW) yawG.rotation.y = (1 - easeOutCubic(Math.min(T / T_L, 1))) * 1.4;
@@ -851,6 +869,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
   }
 
   let lastTs = performance.now(), lastRender = 0, lastActive = performance.now(), frameCount = 0, gSum = 0, gN = 0, gPrev = 0, govOn = true, settled = false, shown = false;
+  let lastSy = window.scrollY, scrollVel = 0;
   function poke() { lastActive = performance.now(); }
   ['scroll', 'wheel', 'touchmove', 'pointermove', 'keydown', 'resize'].forEach(ev => addEventListener(ev, poke, { passive: true }));
   // how long a frame really takes on this GPU (forces the GPU to finish, so it is measured, not just queued)
@@ -894,6 +913,11 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
     else if (probed && !settled && !storedQuality && launched && vt > T_L + 2.2) { settled = true; runProbe(true); }
     const sy = window.scrollY;
     if (launched) { if (!reduce) vt += dt; apply(vt, t, dt); }
+    // scroll speed (smoothed) drives the warp streaks; a teleport (restored scroll position, an instant jump) is ignored
+    { const d = sy - lastSy; lastSy = sy;
+      const inst = Math.abs(d) > state.vh * 1.5 ? 0 : Math.max(-9000, Math.min(9000, d / Math.max(dt, 1 / 120)));
+      scrollVel += (inst - scrollVel) * Math.min(1, dt * 10);
+      WARP.uWarp.value = reduce ? 0 : Math.min(400, Math.max(0, Math.abs(scrollVel) - 650) * 0.075); }
     // scroll: the camera rides down the page; deeper objects move slower (parallax)
     poseCamera(sy);
     BGU.uScroll.value = sy; BGU.uPage.value = Math.min(sy / Math.max(1, state.maxScroll), 1); BGU.uTime.value = reduce ? 0 : t; sparkleTime.value = reduce ? 0 : t;
@@ -915,7 +939,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
       });
     }
     // the things around the head pop in around the landing
-    const pop = sstep(T_L - 0.2, T_L + 0.9, launched ? vt : 0);
+    const pop = headIn > 0 ? sstep(0, 1, (performance.now() - headIn) / 700) : sstep(T_L - 0.2, T_L + 0.9, launched ? vt : 0);
     heroObjs.forEach(o => { o.visible = pop > 0.01 && !(lite && o.userData.kind === 'sparkle'); o.scale.setScalar(o.userData.s * (0.2 + 0.8 * pop)); });
     FU.uPadY.value = heroG.position.y + platform.position.y + 0.004;      // the flame stops at the top of the pad, wherever the pad sits on screen
     renderer.render(scene, camera);
