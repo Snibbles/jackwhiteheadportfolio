@@ -45,7 +45,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/site.css?v=2">
+<link rel="stylesheet" href="css/site.css?v=3">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
@@ -139,7 +139,7 @@
             <div class="crew-top"><span>Crew file</span><span class="crew-live"><i></i>Open &middot; 2027</span></div>
             <picture class="crew-photo">
               <source srcset="images/jw-about.webp" type="image/webp">
-              <img src="images/jw-about.jpg" alt="Jack Whitehead in a navy t-shirt, standing in front of a wooden slat wall" width="1067" height="1427" loading="lazy">
+              <img src="images/jw-about.jpg" alt="Jack Whitehead in a navy t-shirt, standing in front of a wooden slat wall" width="1067" height="1427" loading="lazy" decoding="async">
             </picture>
             <figcaption class="crew-bottom"><strong>Jack Whitehead</strong><span>Digital designer &middot; Amsterdam</span></figcaption>
             <span class="crew-foil" aria-hidden="true"></span>
@@ -278,50 +278,66 @@
           <p class="eyebrow" data-reveal>Tools &amp; skills</p>
           <h2 class="section-title" id="skills-title" data-split>In the toolbox</h2>
         </div>
-        <p class="section-sub" data-reveal>Sixteen tools and skills, grouped by what I use them for.</p>
+        <p class="section-sub" data-reveal>Sixteen tools and skills in four orbits. Pick a planet to see what’s on it.</p>
       </div>
-      <ul class="systems">
-        <li class="system" data-system style="--c: var(--coral); --hole: 0.64">
-          <div class="system-planet" data-planet="design" data-size="1.0" aria-hidden="true"></div>
-          <h3 class="system-name" data-reveal>Design <span class="system-count">06</span></h3>
-          <ul class="system-tools" data-reveal>
-            <li>Figma</li>
-            <li>Adobe XD</li>
-            <li>Illustrator</li>
-            <li>Photoshop</li>
-            <li>Miro</li>
-            <li>Notion</li>
-          </ul>
-        </li>
-        <li class="system" data-system style="--c: var(--sun); --hole: 0.37">
-          <div class="system-planet" data-planet="motion" data-size="0.78" aria-hidden="true"></div>
-          <h3 class="system-name" data-reveal>Prototyping &amp; motion <span class="system-count">03</span></h3>
-          <ul class="system-tools" data-reveal>
-            <li>Premiere Pro</li>
-            <li>After Effects</li>
-            <li>Jitter</li>
-          </ul>
-        </li>
-        <li class="system" data-system style="--c: var(--mint); --hole: 0.32">
-          <div class="system-planet" data-planet="frontend" data-size="0.66" aria-hidden="true"></div>
-          <h3 class="system-name" data-reveal>Front-end <span class="system-count">02</span></h3>
-          <ul class="system-tools" data-reveal>
-            <li>HTML &amp; CSS</li>
-            <li>JavaScript</li>
-          </ul>
-        </li>
-        <li class="system" data-system style="--c: var(--cobalt); --hole: 0.43">
-          <div class="system-planet" data-planet="theory" data-size="0.92" aria-hidden="true"></div>
-          <h3 class="system-name" data-reveal>Theory <span class="system-count">05</span></h3>
-          <ul class="system-tools" data-reveal>
-            <li>User research</li>
-            <li>Wireframing</li>
-            <li>Design systems</li>
-            <li>Accessibility basics</li>
-            <li>User testing / prototyping</li>
-          </ul>
-        </li>
-      </ul>
+      <!-- A small solar system: js/scene3d.js draws it into the stage, js/home.js turns the groups into tabs.
+           Without JavaScript the four groups are simply listed, under a flat map of the system. -->
+      <div class="orrery" data-orrery>
+        <div class="orrery-view">
+          <div class="orrery-stage" aria-hidden="true">
+            <svg class="orrery-map" viewBox="-100 -50 200 100" focusable="false">
+              <g class="orrery-map-orbits"><ellipse rx="40" ry="18"/><ellipse rx="58" ry="26"/><ellipse rx="77" ry="34"/><ellipse rx="96" ry="42"/></g>
+              <circle r="12" fill="#F5C443"/>
+              <circle cx="31" cy="11.6" r="7" fill="#F2552F"/>
+              <circle cx="37.3" cy="-19.9" r="7.5" fill="#3F66F5"/>
+              <circle cx="-59" cy="-21.9" r="6" fill="#F5C443"/>
+              <circle cx="-61.7" cy="32.2" r="5.5" fill="#2EC4B6"/>
+            </svg>
+          </div>
+        </div>
+        <div class="orrery-groups" data-reveal>
+          <div class="orbit" id="orbit-design" data-planet="design" style="--c: var(--coral)">
+            <h3 class="orbit-name">Design <span class="orbit-count">6 tools</span></h3>
+            <p class="orbit-note">Shaping screens and flows, and the boards and docs around them.</p>
+            <ul class="orbit-tools">
+              <li>Figma</li>
+              <li>Adobe XD</li>
+              <li>Illustrator</li>
+              <li>Photoshop</li>
+              <li>Miro</li>
+              <li>Notion</li>
+            </ul>
+          </div>
+          <div class="orbit" id="orbit-theory" data-planet="theory" style="--c: var(--cobalt)">
+            <h3 class="orbit-name">Theory <span class="orbit-count">5 skills</span></h3>
+            <p class="orbit-note">The thinking behind the screens: research, structure and testing.</p>
+            <ul class="orbit-tools">
+              <li>User research</li>
+              <li>Wireframing</li>
+              <li>Design systems</li>
+              <li>Accessibility basics</li>
+              <li>User testing / prototyping</li>
+            </ul>
+          </div>
+          <div class="orbit" id="orbit-motion" data-planet="motion" style="--c: var(--sun)">
+            <h3 class="orbit-name">Prototyping &amp; motion <span class="orbit-count">3 tools</span></h3>
+            <p class="orbit-note">Making things move: video, motion graphics and animated prototypes.</p>
+            <ul class="orbit-tools">
+              <li>Premiere Pro</li>
+              <li>After Effects</li>
+              <li>Jitter</li>
+            </ul>
+          </div>
+          <div class="orbit" id="orbit-frontend" data-planet="frontend" style="--c: var(--mint)">
+            <h3 class="orbit-name">Front-end <span class="orbit-count">2 tools</span></h3>
+            <p class="orbit-note">Building what I design, so it works in a real browser.</p>
+            <ul class="orbit-tools">
+              <li>HTML &amp; CSS</li>
+              <li>JavaScript</li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -329,15 +345,11 @@
   <section class="testimonial" id="testimonial" aria-labelledby="testimonial-title">
     <div class="section-inner">
       <p class="eyebrow" id="testimonial-title" data-reveal>Kind words</p>
-      <figure class="quote-card" data-reveal>
-        <span class="quote-mark" aria-hidden="true">“</span>
+      <figure class="quote">
         <blockquote class="testimonial-quote">
-          <p>Jack is the kind of person who brings a good <em>energy</em> to every project. He’s thoughtful, easy to work with, and always willing to help make an idea better.</p>
+          <p>“Jack is the kind of person who brings a good energy to every project. He’s thoughtful, easy to work with, and always willing to help make an idea better.”</p>
         </blockquote>
-        <figcaption class="quote-by">
-          <span class="quote-avatar" aria-hidden="true">RK</span>
-          <span class="quote-name"><strong>Rens Koster</strong><span>Ex-colleague at Brandium</span></span>
-        </figcaption>
+        <figcaption class="quote-by" data-reveal><strong>Rens Koster</strong> · Ex-colleague at Brandium</figcaption>
       </figure>
     </div>
   </section>
@@ -398,8 +410,8 @@
   </div>
 </footer>
 
-<script src="js/main.js?v=13"></script>
-<script src="js/home.js?v=2"></script>
-<script type="module" src="js/scene3d.js?v=35" onerror="window.__bootFail && window.__bootFail()"></script>
+<script src="js/main.js?v=14"></script>
+<script src="js/home.js?v=3"></script>
+<script type="module" src="js/scene3d.js?v=36" onerror="window.__bootFail && window.__bootFail()"></script>
 </body>
 </html>

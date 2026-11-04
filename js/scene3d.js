@@ -33,15 +33,27 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'default' });
   } catch (e) { return fallback(); }
   root.classList.add('has-3d'); root.classList.remove('no-3d');
+  renderer.debug.checkShaderErrors = false;   // checking makes every shader compile finish on the spot, which stalls the page (they're known good)
+  // compile every shader ahead of time (in the background where the browser can), so nothing stalls the first time it scrolls into view
+  const precompile = () => {
+    if (renderer.extensions.has('KHR_parallel_shader_compile')) renderer.compileAsync(scene, camera).catch(() => {});
+    else renderer.compile(scene, camera);
+  };
 
-  // Resolution is what decides how hard this runs (the scene itself is light), so it adapts: measured once at start, then watched.
-  let dprCap = 1.75, probed = false, lite = false, storedQuality = false;
+  // Resolution is what decides how hard this runs (the scene itself is light). It follows a pixel budget, so a big monitor doesn't
+  // render four times the pixels of a laptop, and it steps down for the rest of the visit if frames come too slowly (see govern()).
+  const PIXEL_BUDGET = 3.4e6, DPR_MAX = 1.5;
+  let quality = 1, lite = false;
   try {
-    const v = parseFloat(sessionStorage.getItem('jw-dprcap')); if (v > 0.5 && v < 4) { dprCap = v; probed = true; storedQuality = true; }
+    const q = parseFloat(sessionStorage.getItem('jw-quality')); if (q >= 0.4 && q < 1) quality = q;
     if (sessionStorage.getItem('jw-lite') === '1') lite = true;
   } catch (e) {}
-  if (navigator.connection && navigator.connection.saveData) { lite = true; dprCap = Math.min(dprCap, 1.0); probed = true; storedQuality = true; }
-  let DPR = Math.min(window.devicePixelRatio || 1, dprCap);
+  if (navigator.connection && navigator.connection.saveData) { lite = true; quality = Math.min(quality, 0.7); }
+  function targetDpr() {
+    const native = window.devicePixelRatio || 1, budget = Math.sqrt(PIXEL_BUDGET / (window.innerWidth * window.innerHeight));
+    return Math.max(0.6, Math.min(native, DPR_MAX, Math.max(budget, Math.min(native, 1))) * quality);
+  }
+  let DPR = targetDpr();
   renderer.setPixelRatio(DPR);
   renderer.setClearColor(0x080A14, 1);
   host.appendChild(renderer.domElement);
@@ -562,15 +574,13 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
     { sec: 'work', f: 0.36, ex: 1.04, kind: 'rock', pal: 'coral', rk: 1, s: 0.13, z: -0.5, m: 1 },
     { sec: 'work', f: 0.60, ex: -1.04, kind: 'rock', pal: 'stone', rk: 2, s: 0.09, z: -0.3, m: 0 },
     { sec: 'work', f: 0.84, ex: 1.10, kind: 'moon', pal: 'slate', s: 0.24, z: -1.0, m: 1, seed: 4.0 },
-    { sec: 'skills', f: 0.80, ex: 1.04, kind: 'rock', pal: 'stone', rk: 3, s: 0.12, z: -0.4, m: 0 },
-    { sec: 'skills', f: 0.12, ex: 1.06, kind: 'crystal', pal: 'mint', s: 0.11, z: -0.3, m: 1 },
     { sec: 'testimonial', f: 0.5, ex: -1.06, kind: 'moon', pal: 'cream', s: 0.17, z: -0.7, m: 1, seed: 1.0 },
     { sec: 'testimonial', f: 0.3, ex: 1.05, kind: 'rock', pal: 'violet', rk: 0, s: 0.08, z: -0.3, m: 0 },
     { sec: 'contact', f: 0.18, ex: 1.06, kind: 'rock', pal: 'coral', rk: 2, s: 0.10, z: -0.4, m: 1 },
     { sec: 'contact', f: 0.55, ex: -1.07, kind: 'crystal', pal: 'violet', s: 0.10, z: -0.4, m: 0 },
     { sec: 'about', f: 0.16, ex: 0.95, kind: 'sparkle', pal: 'cream', s: 0.03, z: -0.2, m: 1 }, { sec: 'about', f: 0.62, ex: 0.95, kind: 'sparkle', pal: 'sun', s: 0.026, z: -0.2, m: 0 },
     { sec: 'work', f: 0.22, ex: 0.96, kind: 'sparkle', pal: 'cream', s: 0.026, z: -0.2, m: 1 }, { sec: 'work', f: 0.72, ex: -0.96, kind: 'sparkle', pal: 'coral', s: 0.03, z: -0.2, m: 0 },
-    { sec: 'skills', f: 0.55, ex: 0.95, kind: 'sparkle', pal: 'cream', s: 0.03, z: -0.2, m: 1 }, { sec: 'testimonial', f: 0.7, ex: 0.95, kind: 'sparkle', pal: 'sun', s: 0.026, z: -0.2, m: 0 }
+    { sec: 'testimonial', f: 0.7, ex: 0.95, kind: 'sparkle', pal: 'sun', s: 0.026, z: -0.2, m: 0 }
   ];
   // other pages (all projects, case studies) have no hero: just scenery, spread down the page
   const SUB = [
@@ -585,46 +595,137 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
     const o = makeObj(d); Object.assign(o.userData, { i, aspin: [0.12 + (i % 3) * 0.06, 0.18 + (i % 4) * 0.05, 0.08], phase: i * 1.7 }); ambientG.add(o); return o;
   });
 
-  /* ---------- the toolbox: one planet per group of skills, drawn exactly in the slot the page leaves for it (data-planet) ---------- */
-  const SKILL_PLANETS = {
-    design: { kind: 'ring', pal: ['coral', 'sun'], ringPal: ['cream', 'coral'], seed: 1.0, halo: 0.22 },
-    motion: { kind: 'bands', pal: ['sun', 'coral'], seed: 2.6, moon: true, halo: 0.2 },
-    frontend: { kind: 'earth', pal: ['mint', 'cobalt'], seed: 3.0, halo: 0.2 },
-    theory: { kind: 'bands', pal: ['cobalt', 'violet'], seed: 4.2, halo: 0.22 }
+  /* ---------- the toolbox: a small solar system, drawn into its stage (.orrery-stage) ----------
+     js/home.js owns the choice ("orrery:select"). This turns the system so the chosen planet comes forward, keeps a label on
+     each planet, and reports a tap on a planet or its label ("orrery:pick"). Planets sit inner to outer in the page's order. */
+  const ORRERY_PLANETS = {
+    design: { kind: 'ring', pal: ['coral', 'sun'], ringPal: ['cream', 'coral'], seed: 1.0, halo: 0.22, size: 0.16 },
+    theory: { kind: 'bands', pal: ['cobalt', 'violet'], seed: 4.2, halo: 0.22, size: 0.18 },
+    motion: { kind: 'bands', pal: ['sun', 'coral'], seed: 2.6, moon: true, halo: 0.2, size: 0.15 },
+    frontend: { kind: 'earth', pal: ['mint', 'cobalt'], seed: 3.0, halo: 0.2, size: 0.13 }
   };
-  const skillPlanets = Array.from(document.querySelectorAll('[data-planet]')).filter(el => SKILL_PLANETS[el.dataset.planet]).map((el, i) => {
-    const o = makeObj({ ...SKILL_PLANETS[el.dataset.planet], s: 1 });
-    Object.assign(o.userData, { slot: el, size: parseFloat(el.dataset.size) || 1, phase: i * 1.9, ang: i * 1.3, spinK: 1, spinTo: 1, grow: 1, growTo: 1, placed: false });
-    const group = el.closest('[data-system]') || el;            // pointing at a column makes its planet spin up and lean in
-    group.addEventListener('pointerenter', () => { o.userData.spinTo = 5; o.userData.growTo = 1.08; poke(); });
-    group.addEventListener('pointerleave', () => { o.userData.spinTo = 1; o.userData.growTo = 1; poke(); });
-    o.visible = false; scene.add(o); return o;
-  });
-  function placeSkillPlanets() {             // on layout: where each slot sits on the page, and how big its planet is
-    skillPlanets.forEach(o => {
-      const d = o.userData, r = d.slot.getBoundingClientRect();
-      d.placed = r.width > 0 && r.height > 0;
-      if (!d.placed) return;
-      d.cx = r.left + r.width / 2; d.cy = r.top + window.scrollY + r.height / 2;
-      d.rpx = (Math.min(r.width, r.height) * d.size * (d.kind === 'ring' ? 0.56 : 0.86)) / 2;    // a ringed planet leaves room for its ring
+  const ORBIT_R = [0.46, 0.63, 0.80, 0.97], FOCUS = 0.87;        // orbit radii (the outer one about fills the stage); the chosen planet turns to about 50°, front right
+  const orrery = (() => {
+    const stage = document.querySelector('.orrery-stage');
+    const groups = stage ? Array.from(document.querySelectorAll('.orbit[data-planet]')).filter(el => ORRERY_PLANETS[el.dataset.planet]).slice(0, 4) : [];
+    if (!groups.length) return null;
+    const O = {
+      stage, G: new THREE.Group(), tilt: new THREE.Group(), turn: new THREE.Group(), placed: false, shown: false,
+      want: Math.min(+stage.dataset.active || 0, groups.length - 1), sel: -1, now: 0, from: 0, to: 0, t0: 0, dur: 1, hover: -1,
+      hi: [0, 0, 0, 0], screen: groups.map(() => ({ x: 0, y: 0, r: 0 })), c: new THREE.Vector3(), e: new THREE.Vector3(), v: new THREE.Vector3()
+    };
+    O.G.add(O.tilt); O.tilt.add(O.turn); O.G.visible = false; scene.add(O.G);
+    O.sun = makeObj({ kind: 'plain', pal: 'sun', s: 1, halo: 0.55 }); O.sun.scale.setScalar(0.24); O.tilt.add(O.sun);
+    // the orbits: one flat disc that draws thin rings (dashed, and the chosen one solid, brighter and in its planet's colour) around a faint warm glow
+    O.rings = { uR: { value: new THREE.Vector4(...ORBIT_R) }, uHi: { value: new THREE.Vector4() }, uCol: { value: groups.map(g => new THREE.Color(PAL[ORRERY_PLANETS[g.dataset.planet].pal[0]][2])) } };
+    const disc = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 2.2), new THREE.ShaderMaterial({
+      uniforms: O.rings, transparent: true, depthWrite: false,
+      vertexShader: `varying vec2 vP; void main(){ vP = position.xy; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+      fragmentShader: `uniform vec4 uR, uHi; uniform vec3 uCol[4]; varying vec2 vP;
+        void main(){
+          float r = length(vP), f = fwidth(r), dash = step(0.45, fract(atan(vP.y, vP.x) * 6.3662));
+          float glow = 0.09 * smoothstep(0.6, 0.0, r), a = glow; vec3 col = vec3(1.0, 0.7, 0.35) * glow;
+          for (int k = 0; k < 4; k++) {
+            float h = uHi[k], w = 0.35 + 0.9 * h;
+            float l = (1.0 - smoothstep(w * f, (w + 1.0) * f, abs(r - uR[k]))) * mix(0.32 * dash, 0.95, h);
+            col += mix(vec3(0.72, 0.76, 1.0), uCol[k], h) * l; a += l;
+          }
+          if (a < 0.004) discard;
+          gl_FragColor = vec4(col / a, min(a, 1.0));
+          #include <colorspace_fragment>
+        }`
+    }));
+    disc.rotation.x = -Math.PI / 2; O.tilt.add(disc);
+    O.planets = groups.map((g, i) => {
+      const P = ORRERY_PLANETS[g.dataset.planet], o = makeObj({ ...P, s: 0.2 }), a = i * Math.PI / 2;
+      o.position.set(Math.sin(a) * ORBIT_R[i], 0, Math.cos(a) * ORBIT_R[i]);
+      Object.assign(o.userData, { a, size: P.size, grow: 1, glow: o.children.find(c => c.userData.isHalo) });
+      O.turn.add(o); return o;
     });
+    O.now = FOCUS - O.planets[O.want].userData.a - (reduce ? 0 : 1.5);    // it waits a little turned away, and swings into place when it first comes into view
+    O.labels = groups.map((g, i) => {
+      const el = document.createElement('span');
+      el.className = 'orrery-label'; el.dataset.index = i; el.style.setProperty('--c', g.style.getPropertyValue('--c'));
+      el.textContent = g.querySelector('.orbit-name').firstChild.textContent.trim();
+      stage.append(el); return el;
+    });
+    stage.addEventListener('orrery:select', e => { O.want = e.detail.index; poke(); });
+    // a tap (not a drag) on a planet or its label picks it; a mouse over one shows it can be clicked
+    const pickAt = (e) => {
+      const label = e.target.closest && e.target.closest('.orrery-label');
+      if (label) return +label.dataset.index;
+      let best = -1, bd = 1e9;
+      O.screen.forEach((p, i) => { const d = Math.hypot(e.clientX - p.x, e.clientY - p.y); if (d < p.r + 14 && d < bd) { bd = d; best = i; } });
+      return best;
+    };
+    let down = null;
+    stage.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; });
+    stage.addEventListener('pointerup', e => {
+      const tap = down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) < 10; down = null;
+      const i = tap ? pickAt(e) : -1;
+      if (i >= 0) stage.dispatchEvent(new CustomEvent('orrery:pick', { detail: { index: i } }));
+    });
+    stage.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') { O.hover = pickAt(e); stage.style.cursor = O.hover >= 0 ? 'pointer' : ''; } });
+    stage.addEventListener('pointerleave', () => { O.hover = -1; stage.style.cursor = ''; });
+    return O;
+  })();
+  function placeOrrery() {                     // on layout: where the stage is, and how the system sits in it
+    if (!orrery) return;
+    // measured from the layout itself, not the screen, so a reveal animation that's still sliding the section in can't shift the system
+    const O = orrery; let x = 0, y = 0;
+    for (let n = O.stage; n; n = n.offsetParent) { x += n.offsetLeft; y += n.offsetTop; }
+    O.w = O.stage.offsetWidth; O.placed = O.w > 0;
+    O.left = x; O.top = y;
+    O.cx = x + O.w / 2; O.cy = y + O.stage.offsetHeight * 0.45;      // a little above the middle: the arrows sit underneath
+    O.fill = state.mobile ? 0.94 : 0.9;                               // the outer orbit, as a share of the stage's half-width
+    O.tilt.rotation.x = state.mobile ? 0.34 : 0.17;                   // phones see it a little more from above, so it's taller
+    O.big = state.mobile ? 1.15 : 1;                                  // and its planets a little bigger
+    O.labelW = O.labels.map(l => l.offsetWidth);                      // so a label near the edge can be kept inside
   }
-  function updateSkillPlanets(t, dt) {
-    const sy = window.scrollY;
-    skillPlanets.forEach(o => {
-      const d = o.userData, y = d.cy - sy;
-      o.visible = d.placed && y > -state.vh * 0.5 && y < state.vh * 1.5;
-      if (!o.visible) return;
-      d.spinK += (d.spinTo - d.spinK) * Math.min(1, dt * 4); d.grow += (d.growTo - d.grow) * Math.min(1, dt * 6);
-      if (!reduce) d.ang += dt * 0.35 * d.spinK;
-      if (d.spinT) d.spinT.rotation.y = d.ang;
-      if (d.moonP) d.moonP.rotation.y = d.ang * 1.6;
-      // pinned to its slot every frame: the camera looks down a little, so perspective would otherwise let it drift as you scroll
-      const ndcY = 1 - (2 * y) / state.vh, centre = worldAtNdc((d.cx / state.vw) * 2 - 1, ndcY, 0), edge = worldAtNdc(((d.cx + d.rpx) / state.vw) * 2 - 1, ndcY, 0);
-      const r = centre.distanceTo(edge);
-      o.position.set(centre.x, centre.y + (reduce ? 0 : Math.sin(t * 0.8 + d.phase) * r * 0.06), centre.z);
-      o.rotation.z = reduce ? 0 : Math.sin(t * 0.3 + d.phase) * 0.04;
-      o.scale.setScalar(2 * r * d.grow);
+  const easeInOut = x => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  const wrapAngle = a => a - Math.PI * 2 * Math.round(a / (Math.PI * 2));
+  function updateOrrery(t, dt) {
+    if (!orrery) return;
+    const O = orrery, y = O.cy - window.scrollY;
+    O.G.visible = O.placed && y > -state.vh * 0.6 && y < state.vh * 1.6;
+    if (!O.G.visible) return;
+    // pinned to the stage and sized to it, every frame (the camera looks down a little, so perspective shifts things as you scroll)
+    const ndcY = 1 - (2 * y) / state.vh;
+    worldAtNdc((O.cx / state.vw) * 2 - 1, ndcY, 0, O.c); worldAtNdc(((O.cx + O.w / 2) / state.vw) * 2 - 1, ndcY, 0, O.e);
+    const half = O.c.distanceTo(O.e), pxPerUnit = O.w / 2 / half;
+    O.G.position.copy(O.c); O.G.scale.setScalar(half * O.fill);
+    // the first time it comes into view it swings round into place; after that it turns to whichever planet is chosen
+    const target = i => FOCUS - O.planets[i].userData.a;
+    if (!O.shown && y < state.vh * 0.85) O.shown = true;
+    if (O.shown && O.want !== O.sel) {
+      O.dur = O.sel < 0 ? 1.8 : 1.1; O.sel = O.want; O.from = O.now; O.to = O.now + wrapAngle(target(O.sel) - O.now); O.t0 = t;
+      O.labels.forEach((l, i) => l.classList.toggle('is-active', i === O.sel));
+    }
+    const k = reduce ? 1 : Math.min(1, (t - O.t0) / O.dur);
+    O.now = O.from + (O.to - O.from) * easeInOut(k);
+    if (k < 1) poke();                                                // full frame rate while it turns
+    O.turn.rotation.y = O.now + (reduce ? 0 : Math.sin(t * 0.3) * 0.03);
+    if (!reduce) O.sun.userData.spinT.rotation.y = t * 0.15;
+    // the chosen planet grows, glows and lights up its orbit
+    O.planets.forEach((o, i) => {
+      const d = o.userData, on = i === O.sel ? 1 : 0;
+      d.grow += ((on ? 1.3 : i === O.hover ? 1.12 : 1) - d.grow) * Math.min(1, dt * 6);
+      O.hi[i] += (on - O.hi[i]) * Math.min(1, dt * 5);
+      o.scale.setScalar(d.size * O.big * d.grow);
+      if (d.glow) d.glow.material.uniforms.a.value = 0.2 + 0.3 * O.hi[i];
+      if (!reduce) { d.spinT.rotation.y += dt * 0.6; if (d.moonP) d.moonP.rotation.y += dt * 1.1; }
+    });
+    O.rings.uHi.value.fromArray(O.hi);
+    // the labels ride on top of their planets (dimmer when a planet is round the back)
+    O.G.updateMatrixWorld(true);
+    const top = O.top - window.scrollY;
+    O.planets.forEach((o, i) => {
+      o.getWorldPosition(O.v).project(camera);
+      const x = (O.v.x + 1) / 2 * state.vw, yy = (1 - O.v.y) / 2 * state.vh, r = 0.5 * o.scale.x * O.G.scale.x * pxPerUnit;
+      Object.assign(O.screen[i], { x, y: yy, r });
+      const el = O.labels[i], hw = (O.labelW[i] || 0) / 2 + 6, lx = Math.min(Math.max(x - O.left, hw), O.w - hw);
+      el.style.transform = `translate3d(${lx.toFixed(1)}px, ${(yy - top - r - 8).toFixed(1)}px, 0)`;
+      el.style.opacity = i !== O.sel && Math.cos(o.userData.a + O.turn.rotation.y) < -0.35 ? '0.8' : '';
     });
   }
 
@@ -715,13 +816,12 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
       }
       top.needsUpdate = true; rad.needsUpdate = true; rad0.needsUpdate = true;
     });
-    perf.flameFit = { full: [+full.ox.toFixed(3), +full.oz.toFixed(3), full.cells], root: [+root.ox.toFixed(3), +root.oz.toFixed(3), root.cells] };
   }
   let headMat = null;
   function buildHead(gltf) {
     gltf.scene.traverse(o => { if (o.isMesh) head = o; });
     const orig = head.material;
-    const tS = performance.now(); smoothNormals(head.geometry, 30); perf.smooth = performance.now() - tS;
+    smoothNormals(head.geometry, 30);
     headMat = new THREE.ShaderMaterial({
       uniforms: { uShadow: { value: new THREE.Color(PAL.cobalt[1]) }, uMid: { value: new THREE.Color(0xFF5A36) }, uLight: { value: new THREE.Color(0xFFC93C) },
                   uInk: { value: new THREE.Color(INK) }, map: { value: orig.map }, uL: { value: LIGHT }, uGlow: { value: 0 }, uRim: { value: new THREE.Color(0x9DB6FF) },
@@ -754,6 +854,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
     if (hero) { yawG.add(gltf.scene); fitFlameToHead(); }        // the landing rocket only exists on the home page
     headReady = true;
     buildFinale(gltf.scene);
+    precompile();                                               // the head and its copy in the footer bring new shaders
   }
 
   /* ---------- the finale: at the end of the page the head peeks over the horizon of the planet in the footer ----------
@@ -817,7 +918,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
   }
 
   /* ---------- layout: head big on the right (desktop) / on top (phone); scroll moves the camera ---------- */
-  const state = { vw: 1, vh: 1, aspect: 1, HV: 1, D: 3, PXW: 0.001, mobile: false, maxScroll: 1 }, perf = {};
+  const state = { vw: 1, vh: 1, aspect: 1, HV: 1, D: 3, PXW: 0.001, mobile: false, maxScroll: 1 };
   function updatePx() {
     const px = state.vh * DPR / (2 * Math.tan(THREE.MathUtils.degToRad(FOV / 2)));
     sparkMat.uniforms.uPx.value = px; burstMat.uniforms.uPx.value = px; padLights.material.uniforms.uPx.value = px;
@@ -832,15 +933,15 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
     scene.traverse(o => { if (o.userData && o.userData.isHalo) o.visible = !v; });
     updateStars(); if (state.vh > 1) placeAmbient();
   }
-  const basePos = new THREE.Vector3(), baseLook = new THREE.Vector3(), rayCaster = new THREE.Raycaster();
-  const planeAt = z => new THREE.Plane(new THREE.Vector3(0, 0, 1), -z);
+  const basePos = new THREE.Vector3(), baseLook = new THREE.Vector3(), rayCaster = new THREE.Raycaster(), ndcV = new THREE.Vector2(), zPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
   function poseCamera(scrollPx) {
     const dy = -scrollPx * state.PXW;
     camera.position.set(basePos.x, basePos.y + dy, basePos.z); camera.lookAt(baseLook.x, baseLook.y + dy, baseLook.z); camera.updateMatrixWorld();
   }
-  function worldAtNdc(ndcX, ndcY, z) {
-    rayCaster.setFromCamera(new THREE.Vector2(ndcX, ndcY), camera);
-    const pt = new THREE.Vector3(); rayCaster.ray.intersectPlane(planeAt(z), pt); return pt;
+  // where a point of the screen (in -1..1 coordinates) meets the depth z; pass `out` to reuse a vector in per-frame code
+  function worldAtNdc(ndcX, ndcY, z, out = new THREE.Vector3()) {
+    rayCaster.setFromCamera(ndcV.set(ndcX, ndcY), camera);
+    zPlane.constant = -z; rayCaster.ray.intersectPlane(zPlane, out); return out;
   }
   // right-most pixel of any headline/paragraph/button in the hero (tight to the text, not the box it sits in)
   function heroTextRight() {
@@ -866,7 +967,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
     const vw = window.innerWidth, vh = window.innerHeight;
     renderer.setSize(vw, vh); state.vw = vw; state.vh = vh; state.aspect = vw / vh; state.mobile = state.aspect < 1.05 || vw < 760;
     BGU.uRes.value.set(vw, vh);
-    { const want = Math.min(window.devicePixelRatio || 1, dprCap); if (Math.abs(want - DPR) > 0.01) setDpr(want); }
+    { const want = targetDpr(); if (Math.abs(want - DPR) > 0.01) setDpr(want); }
     state.HV = state.mobile ? Math.max(1.05, 1.28 / state.aspect) : 1.0;
     let ndcX = state.mobile ? 0 : 0.36, ndcY = state.mobile ? 0.24 : -0.28;
     if (!state.mobile && hero) {
@@ -918,7 +1019,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
       o.scale.setScalar(d.s * comp * k);
     });
     placeFinale(maxScroll);
-    placeSkillPlanets();
+    placeOrrery();
     poseCamera(window.scrollY);
     bakeNebula(); updateStars();
   }
@@ -1002,52 +1103,32 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
     if (T >= T_L - 0.3) reveal();
   }
 
-  let lastTs = performance.now(), lastRender = 0, lastActive = performance.now(), frameCount = 0, gSum = 0, gN = 0, gPrev = 0, govOn = true, settled = false, shown = false;
+  let lastTs = performance.now(), lastRender = 0, lastActive = performance.now(), gPrev = 0, shown = false;
   let lastSy = window.scrollY, scrollVel = 0;
   function poke() { lastActive = performance.now(); }
   ['scroll', 'wheel', 'touchmove', 'pointermove', 'keydown', 'resize'].forEach(ev => addEventListener(ev, poke, { passive: true }));
-  // how long a frame really takes on this GPU (forces the GPU to finish, so it is measured, not just queued)
-  function gpuMs(frames, batches) {
-    const gl = renderer.getContext(), px = new Uint8Array(4); let best = 1e9;
-    for (let b = 0; b < batches; b++) {
-      const t0 = performance.now(); for (let i = 0; i < frames; i++) renderer.render(scene, camera);
-      gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); best = Math.min(best, (performance.now() - t0) / frames);
-      if (best > 40) break;
-    }
-    return best;
-  }
-  function storeQuality() { try { sessionStorage.setItem('jw-dprcap', dprCap.toFixed(2)); } catch (e) {} }
-  function runProbe(final) {                    // pick the sharpest resolution this machine can hold at 60 fps (budget: 7 ms of GPU per frame)
-    probed = true;
-    const native = window.devicePixelRatio || 1, base = Math.min(native, 1.25);
-    if (Math.abs(DPR - base) > 0.01) setDpr(base);
-    gpuMs(3, 1);                                 // warm-up: compile programs, allocate buffers
-    const t = Math.max(gpuMs(4, 4), 0.5), want = Math.max(0.75, Math.min(Math.min(native, 2), base * Math.sqrt(7 / t)));
-    // the first look happens while the page is still loading and can only be pessimistic; the second one (after the landing) is the one to trust
-    dprCap = final || t > 14 ? want : Math.max(want, Math.min(native, 1.5));
-    setDpr(Math.min(native, dprCap));
-    perf[final ? 'probe2Ms' : 'probe1Ms'] = t; perf.dprCap = dprCap;
-    if (final && (want < 1.0 || t > 14)) setLite(true);
-    if (final) storeQuality();
-  }
-  function downgrade() {                        // still slow while it matters: render fewer pixels
-    dprCap = Math.max(0.75, Math.min(DPR, dprCap) * 0.82); setDpr(Math.min(window.devicePixelRatio || 1, dprCap));
-    if (dprCap < 1.0) setLite(true);
-    if (dprCap <= 0.76) govOn = false;
-    storeQuality(); gSum = 0; gN = 0;
+  // The governor: while things move, if the typical frame takes too long (under ~45 fps), draw fewer pixels. A frame costs about what its
+  // pixels cost, so it aims straight for ~60 fps in one step (a resize is a hitch of its own) rather than creeping down. It only watches
+  // frame times, so it never adds work of its own.
+  const gov = { frames: [], steps: 0 };
+  function govern(interval) {
+    gov.frames.push(interval);
+    if (gov.frames.length < 90) return;
+    const typical = gov.frames.sort((x, y) => x - y)[45]; gov.frames.length = 0;
+    if (typical < 22 || gov.steps >= 3) return;
+    gov.steps++; quality = Math.max(0.4, quality * Math.min(0.85, Math.max(0.55, Math.sqrt(17 / typical))));
+    setDpr(targetDpr()); if (quality < 0.7) setLite(true);
+    try { sessionStorage.setItem('jw-quality', quality.toFixed(2)); } catch (e) {}
   }
   function loop(frameTime) {
-    // Smooth scrolling (Lenis) moves the page in its own animation frame. Step it here first, so the scene always draws the page's
-    // scroll position for this frame, never the last one. (Lenis steps by the time since its last step, so a second call in the same frame does nothing.)
-    const lenis = window.JW && window.JW.lenis; if (lenis) lenis.raf(frameTime);
+    // smooth scrolling moves the page once per frame: take that step first, so the scene draws this frame's scroll position, never the last one
+    if (window.JW && window.JW.stepScroll) window.JW.stepScroll(frameTime);
     const now = performance.now();
     // full speed while something is happening (loading, landing, scrolling, moving the pointer); about 30 fps when it's just drifting; nothing at all if motion is reduced
     const active = !launched || now - lastActive < 400 || (!reduce && vt < T_L + 3);
     if (!active && (reduce || now - lastRender < (lite ? 46 : 31))) return;
     lastRender = now;
     const dt = Math.min((now - lastTs) / 1000, 0.05), t = now / 1000; lastTs = now;
-    if (!probed && ++frameCount === 20) runProbe(false);
-    else if (probed && !settled && !storedQuality && launched && vt > T_L + 2.2) { settled = true; runProbe(true); }
     const sy = window.scrollY;
     if (launched) { if (!reduce) vt += dt; apply(vt, t, dt); }
     // scroll speed (smoothed) drives the warp streaks; a teleport (restored scroll position, an instant jump) is ignored
@@ -1078,19 +1159,16 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
       });
     }
     updateFinale(reduce ? 0 : t);
-    updateSkillPlanets(t, dt);
+    updateOrrery(t, dt);
     // the things around the head pop in around the landing
     const pop = headIn > 0 ? sstep(0, 1, (performance.now() - headIn) / 700) : sstep(T_L - 0.2, T_L + 0.9, launched ? vt : 0);
     heroObjs.forEach(o => { o.visible = pop > 0.01 && !(lite && o.userData.kind === 'sparkle'); o.scale.setScalar(o.userData.s * (0.2 + 0.8 * pop)); });
     FU.uPadY.value = heroG.position.y + platform.position.y + 0.004;      // the flame stops at the top of the pad, wherever the pad sits on screen
     renderer.render(scene, camera);
     if (!shown) { shown = true; requestAnimationFrame(() => host.classList.add('ready')); }
-    // watch the frame rate while it matters; if it really is slow (not just a throttled display), render fewer pixels
-    if (govOn && active && launched && vt > T_L + 0.8 && !document.hidden) {
-      if (gPrev) { const d = now - gPrev; if (d < 120 && ++gN && (gSum += d) && gN >= 60) { const avg = gSum / gN; gSum = 0; gN = 0; if (avg > 24) { if (gpuMs(4, 1) > 9) downgrade(); else govOn = false; } } }
-      gPrev = now;
-    } else gPrev = 0;
+    if (active && launched && vt > T_L + 1 && !document.hidden) { if (gPrev && now - gPrev < 250) govern(now - gPrev); gPrev = now; } else gPrev = 0;
   }
   if (lite) setLite(true);
+  precompile();
   renderer.setAnimationLoop(loop);
 })();

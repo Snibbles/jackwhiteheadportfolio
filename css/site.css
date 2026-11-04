@@ -12,7 +12,7 @@
 :root {
   --space: #080A14;
   --space-2: #0E1124;
-  --glass: rgba(22, 26, 56, 0.74);
+  --glass: rgba(20, 24, 52, 0.88);
   --line: rgba(190, 200, 255, 0.14);
   --line-strong: rgba(190, 200, 255, 0.28);
   --text: #F3F0E8;
@@ -183,8 +183,7 @@ main, .site-footer { position: relative; z-index: 1; }
   transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out), background-color 0.4s, box-shadow 0.4s, padding 0.3s;
 }
 .site-header.scrolled {
-  padding-block: 0.75rem; background: rgba(8, 10, 20, 0.66); box-shadow: 0 1px 0 var(--line);
-  backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  padding-block: 0.75rem; background: linear-gradient(rgba(8, 10, 20, 0.97), rgba(8, 10, 20, 0.92)); box-shadow: 0 1px 0 var(--line);
 }
 /* first visit: the header waits for the landing */
 html.has-3d:not(.hero-landed) .site-header { opacity: 0; transform: translateY(-14px); }
@@ -209,7 +208,6 @@ html.boot:not(.hero-landed) .site-header, html.boot:not(.hero-landed) .hero-foot
 }
 .nav-indicator.visible { opacity: 1; }
 .nav-indicator.instant { transition: opacity 0.3s; }
-.site-header:not(.scrolled) .nav ul, .site-header:not(.scrolled) .header-cta { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .scroll-progress {
   position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; pointer-events: none; opacity: 0;
   background: var(--grad); transform-origin: 0 50%; transform: scaleX(var(--sp, 0)); transition: opacity 0.4s;
@@ -234,7 +232,7 @@ html.boot:not(.hero-landed) .site-header, html.boot:not(.hero-landed) .hero-foot
 .mobile-menu.open { transform: none; visibility: visible; transition: transform 0.55s var(--ease-in-out), visibility 0s; }
 @media (min-width: 720px) { .mobile-menu { display: none; } }
 html.menu-open { overflow: hidden; }
-html.menu-open .site-header { z-index: 160; background: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+html.menu-open .site-header { z-index: 160; background: transparent; box-shadow: none; }
 html.menu-open .scroll-progress { opacity: 0; }
 .mobile-menu ul { display: flex; flex-direction: column; gap: 1.8rem; counter-reset: m; }
 .mobile-menu li { opacity: 0; transform: translateY(22px); transition: opacity 0.3s, transform 0.3s; }
@@ -324,8 +322,7 @@ html:not(.has-3d) .replay-btn { display: none; }
   position: relative; z-index: 2; width: 108vw; margin: clamp(0.5rem, 3vw, 2.5rem) 0 0 -4vw; padding: clamp(0.9rem, 1.6vw, 1.3rem) 0;
   overflow: hidden; rotate: -2.4deg;
   border-block: 1px solid var(--line);
-  background: linear-gradient(90deg, rgba(14, 17, 36, 0.2), rgba(14, 17, 36, 0.78) 18% 82%, rgba(14, 17, 36, 0.2));
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  background: linear-gradient(90deg, rgba(14, 17, 36, 0.3), rgba(14, 17, 36, 0.86) 18% 82%, rgba(14, 17, 36, 0.3));
 }
 .marquee-track { display: flex; width: max-content; will-change: transform; }
 .marquee-group {
@@ -339,8 +336,7 @@ html:not(.has-3d) .replay-btn { display: none; }
 .about-grid { display: grid; gap: clamp(3.5rem, 7vw, 7rem); align-items: center; margin-top: clamp(3rem, 6vw, 5rem); }
 @media (min-width: 960px) { .about-grid { grid-template-columns: minmax(0, 420px) minmax(0, 1fr); } }
 
-/* the crew badge floats in zero-g, tilts toward the pointer, and its holographic foil catches the light */
-@property --hover { syntax: "<number>"; inherits: true; initial-value: 0; }
+/* the crew badge floats in zero-g; it tilts and its holographic foil catches the light, from the pointer or (on touch screens) as you scroll */
 .crew { position: relative; width: min(100%, 420px); margin: 0 auto; perspective: 1100px; animation: zero-g 12s ease-in-out infinite; }
 @keyframes zero-g { 0%, 100% { translate: 0 0; rotate: 0deg; } 50% { translate: 0 -14px; rotate: -1.6deg; } }
 @media (min-width: 960px) { .crew { margin: 0; } }
@@ -354,6 +350,7 @@ html:not(.has-3d) .replay-btn { display: none; }
     background: radial-gradient(circle at 35% 30%, #FFE9A8, var(--sun) 55%, #9A5B12); box-shadow: 0 0 12px rgba(245, 196, 67, 0.5);
     offset-path: path("M6 161 a298 155 0 1 0 596 0 a298 155 0 1 0 -596 0"); offset-rotate: 0deg; animation: crew-orbit 28s linear infinite;
   }
+  .crew.is-away .crew-moon { animation-play-state: paused; }      /* off screen: no need to keep it moving */
 }
 @keyframes crew-orbit { to { offset-distance: 100%; } }
 @supports not (offset-path: path("M0 0")) { .crew-moon { display: none; } }
@@ -361,19 +358,26 @@ html:not(.has-3d) .replay-btn { display: none; }
   position: relative; z-index: 1; overflow: hidden; border-radius: 30px; border: 1px solid var(--line-strong);
   background: linear-gradient(170deg, rgba(26, 31, 66, 0.96), rgba(13, 15, 32, 0.96));
   box-shadow: 0 50px 90px -40px rgba(0, 0, 0, 0.9), 0 0 90px -30px rgba(75, 115, 255, 0.45);
-  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); rotate: 1.4deg;
-  transition: transform 0.6s var(--ease-out), --hover 0.5s;
+  rotate: 1.4deg; will-change: transform;
 }
-.crew:hover .crew-card { --hover: 1; transition: transform 0.15s linear, --hover 0.5s; }
-.crew-foil, .crew-glare { position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none; }
-.crew-foil {
-  background: repeating-linear-gradient(115deg, #FF7AB0 0%, #F5C443 6%, #4FD6B5 12%, #4B73FF 18%, #7C5CFF 24%, #FF7AB0 30%);
-  background-size: 260% 260%; background-position: calc(var(--px, 50) * 1%) calc(var(--py, 50) * 1%);
-  mix-blend-mode: color-dodge; opacity: calc(0.07 + 0.3 * var(--hover));
-  -webkit-mask: radial-gradient(farthest-corner at calc(var(--px, 50) * 1%) calc(var(--py, 50) * 1%), #000, rgba(0, 0, 0, 0.25) 70%);
-  mask: radial-gradient(farthest-corner at calc(var(--px, 50) * 1%) calc(var(--py, 50) * 1%), #000, rgba(0, 0, 0, 0.25) 70%);
+/* The shine: a rainbow glint and a soft glare, each a round light that slides over the card (js/home.js moves them).
+   They only ever move and fade, so nothing on the card is repainted, which keeps it smooth on phones. */
+.crew-foil, .crew-glare {
+  position: absolute; z-index: 2; left: 50%; top: 50%; aspect-ratio: 1; border-radius: 50%; pointer-events: none;
+  transform: translate3d(-16%, -22%, 0); will-change: transform, opacity;
 }
-.crew-glare { background: radial-gradient(circle at calc(var(--px, 50) * 1%) calc(var(--py, 50) * 1%), rgba(255, 255, 255, 0.55), transparent 45%); mix-blend-mode: soft-light; opacity: var(--hover); }
+.crew-foil {             /* fine rainbow stripes, brightest where the light is */
+  width: 140%; margin: -70% 0 0 -70%;
+  background: repeating-linear-gradient(115deg, #FF7AB0, #F5C443 2.4%, #4FD6B5 4.8%, #4B73FF 7.2%, #7C5CFF 9.6%, #FF7AB0 12%);
+  -webkit-mask: radial-gradient(closest-side, #000 10%, rgba(0, 0, 0, 0.35) 55%, transparent); mask: radial-gradient(closest-side, #000 10%, rgba(0, 0, 0, 0.35) 55%, transparent);
+  mix-blend-mode: color-dodge; opacity: 0.2;
+}
+.crew-glare {            /* a clean diagonal streak of light */
+  width: 120%; margin: -60% 0 0 -60%;
+  background: linear-gradient(115deg, transparent 36%, rgba(255, 255, 255, 0.9) 50%, transparent 64%);
+  -webkit-mask: radial-gradient(closest-side, #000 25%, transparent); mask: radial-gradient(closest-side, #000 25%, transparent);
+  mix-blend-mode: overlay; opacity: 0.4;
+}
 .crew-top, .crew-bottom { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .crew-top { padding: 0.95rem 1.2rem; font: 500 0.66rem/1 var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-dim); }
 .crew-live { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text); }
@@ -512,75 +516,93 @@ html:not(.has-3d) .replay-btn { display: none; }
 }
 .work-more { display: flex; justify-content: center; margin-top: clamp(3.5rem, 7vw, 6rem); }
 
-/* 9 · Skills: four groups, a 3D planet above each (drawn by js/scene3d.js into the empty slot) */
-.systems { --slot: clamp(124px, 13vw, 190px); --gutter: clamp(1.2rem, 3vw, 2.6rem); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gutter); }
-.system { display: flex; flex-direction: column; }
-.system:nth-child(n+3) { margin-top: 3.2rem; }              /* two to a row: room before the second pair */
-@media (min-width: 900px) {
-  .systems { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .system:nth-child(n+3) { margin-top: 0; }
+/* 9 · Skills: a small solar system to step through =========================
+   js/scene3d.js draws the system into the stage and keeps a label on each planet; js/home.js turns the groups into tabs.
+   Without JavaScript the four groups are simply listed, under a flat map of the system. */
+.orrery { display: grid; gap: clamp(1.4rem, 3vw, 2.2rem); }
+.orrery-view { position: relative; margin-inline: calc(var(--edge) * -1); }        /* phones: the system gets the whole width */
+.orrery:not(.is-ready) .orrery-view { width: min(100%, 40rem); margin-inline: auto; }   /* no JavaScript: just a picture above the lists */
+.orrery-stage { position: relative; aspect-ratio: 1.2; touch-action: pan-y; -webkit-user-select: none; user-select: none; }
+.orrery-map { display: none; position: absolute; inset: 8% 3%; width: 94%; height: 84%; overflow: visible; }
+.no-3d .orrery-map { display: block; }
+.orrery-map-orbits { fill: none; stroke: rgba(190, 200, 255, 0.3); stroke-width: 0.5; stroke-dasharray: 1.5 3; }
+
+/* a label rides on each planet (placed by js/scene3d.js); the chosen one fills with its colour */
+.orrery-label {
+  position: absolute; left: 0; top: 0; z-index: 2; translate: -50% -100%;
+  display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.32rem 0.7rem 0.32rem 0.55rem; border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); background: rgba(10, 12, 28, 0.84);
+  font-size: 0.74rem; font-weight: 600; line-height: 1.1; white-space: nowrap; color: var(--text-dim); cursor: pointer;
+  transition: color 0.3s, background-color 0.3s, border-color 0.3s, opacity 0.3s;
 }
-/* side by side, the groups share rows (planet, label, list): a label that wraps to two lines keeps every underline level */
-@supports (grid-template-rows: subgrid) {
-  .system { display: grid; grid-row: span 3; grid-template-rows: subgrid; }
+.orrery-label::before { content: ""; width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--c); }
+.orrery-label.is-active { border-color: var(--c); background: color-mix(in srgb, var(--c) 32%, #0C0E22); color: #fff; }
+
+/* stepping through: arrows in the bottom corners, where you are between them */
+.orrery-step {
+  position: absolute; bottom: 0.4rem; z-index: 3; display: grid; place-items: center; width: 2.9rem; height: 2.9rem;
+  border-radius: 50%; border: 1px solid var(--line-strong); background: rgba(14, 17, 38, 0.86); font-size: 1.05rem; color: var(--text);
+  transition: background-color 0.25s, color 0.25s, border-color 0.25s, scale 0.3s var(--ease-spring);
 }
-.system-planet { position: relative; height: var(--slot); margin-bottom: 1.6rem; }
-/* the orbit line that links the four planets, broken around each one */
-@media (min-width: 900px) {
-  .system-planet::before {
-    content: ""; position: absolute; top: 50%; left: calc(var(--gutter) / -2); right: calc(var(--gutter) / -2); border-top: 1px dashed rgba(190, 200, 255, 0.3);
-    -webkit-mask: radial-gradient(circle at var(--at, 50%) 0, transparent calc(var(--slot) * var(--hole, 0.4)), #000 calc(var(--slot) * var(--hole, 0.4) + 1px));
-    mask: radial-gradient(circle at var(--at, 50%) 0, transparent calc(var(--slot) * var(--hole, 0.4)), #000 calc(var(--slot) * var(--hole, 0.4) + 1px));
-  }
-  /* the line starts and ends at the outer planets, so the gap stays centred on them */
-  .system:first-child .system-planet::before { left: 50%; --at: 0%; }
-  .system:last-child .system-planet::before { right: 50%; --at: 100%; }
+.orrery-step[data-step="-1"] { left: var(--edge); }
+.orrery-step[data-step="1"] { right: var(--edge); }
+.orrery-step:hover { border-color: var(--text); background: var(--text); color: var(--ink); }
+.orrery-step:active { scale: 0.9; }
+.orrery-pos { position: absolute; left: 50%; bottom: 1.35rem; translate: -50% 0; font: 500 0.74rem/1 var(--font-mono); letter-spacing: 0.16em; color: var(--text-dim); }
+
+/* the groups: all listed without JavaScript; with it, tabs and the one you picked */
+.orrery-groups { display: grid; gap: 2.6rem 2rem; }
+@media (min-width: 700px) { .orrery-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.orrery.is-ready .orrery-groups { display: block; }
+/* phones: a two-by-two grid of groups; wide screens: a legend beside the system, inner orbit first */
+.orrery-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; margin-bottom: clamp(1.8rem, 3vw, 2.4rem); }
+.orrery-tab {
+  display: flex; align-items: center; gap: 0.55rem; padding: 0.7rem 0.85rem; border-radius: 14px; text-align: left;
+  border: 1px solid var(--line); background: rgba(16, 19, 44, 0.7); font-size: 0.9rem; font-weight: 600; line-height: 1.2; color: var(--text-dim);
+  transition: color 0.25s, border-color 0.25s, background-color 0.25s;
 }
-.system-name {
-  display: flex; align-items: center; gap: 0.6rem; padding-bottom: 0.95rem; border-bottom: 1px solid color-mix(in srgb, var(--c) 55%, transparent);
-  font: 500 0.74rem/1.3 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase;
+.orrery-tab::before { content: ""; flex: none; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); transition: scale 0.4s var(--ease-spring); }
+.orrery-tab:hover { border-color: var(--line-strong); color: var(--text); }
+.orrery-tab[aria-selected="true"] { border-color: color-mix(in srgb, var(--c) 70%, transparent); background: color-mix(in srgb, var(--c) 18%, #0E1129); color: var(--text); }
+.orrery-tab[aria-selected="true"]::before { scale: 1.3; }
+.orrery-tab-n { margin-left: auto; padding-left: 0.4rem; font: 500 0.72rem/1 var(--font-mono); color: var(--text-dim); }
+
+.orbit-name {
+  display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.9rem; row-gap: 0.4rem;
+  font-family: var(--font-display); font-weight: 700; font-size: clamp(1.8rem, 3.4vw, 2.7rem); line-height: 1.05; letter-spacing: -0.035em;
 }
-.system-name::before { content: ""; flex: none; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--c); box-shadow: 0 0 12px var(--c); transition: transform 0.4s var(--ease-spring); }
-.system:hover .system-name::before { transform: scale(1.45); }
-.system-count { margin-left: auto; color: var(--text-dim); }
-.system-tools li { padding: 0.8rem 0; border-bottom: 1px solid var(--line); font-size: 1.04rem; font-weight: 600; }
-/* without WebGL (or scripts), a flat planet stands in */
-.no-3d .system-planet::after {
-  content: ""; position: absolute; left: 50%; top: 50%; width: calc(var(--slot) * 0.55); aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
-  background: radial-gradient(circle at 34% 30%, #fff 0 16%, var(--c) 16.5% 58%, color-mix(in srgb, var(--c) 40%, #10132A) 58.5%);
-  box-shadow: 0 0 0 2px #10132A, 0 0 44px color-mix(in srgb, var(--c) 45%, transparent);
+.orbit-count { font: 500 0.74rem/1 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: color-mix(in srgb, var(--c) 65%, #fff); }
+.orbit-note { max-width: 38ch; margin-top: 0.8rem; color: var(--text-dim); }
+.orbit-tools { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.4rem; }
+.orbit-tools li {
+  padding: 0.5rem 0.95rem; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--c) 38%, transparent);
+  background: color-mix(in srgb, var(--c) 9%, rgba(14, 17, 38, 0.8)); font-size: 0.95rem; font-weight: 600;
+}
+/* a newly picked group: its name, then its tools, one after another */
+.orrery.is-ready .orbit:not([hidden]) :is(.orbit-name, .orbit-note, li) { animation: orbit-in 0.5s var(--ease-out) both; }
+.orrery.is-ready .orbit:not([hidden]) li { animation-delay: calc(0.08s + var(--i, 0) * 0.04s); }
+@keyframes orbit-in { from { opacity: 0; translate: 0 10px; } }
+
+@media (min-width: 960px) {
+  .orrery.is-ready { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: center; column-gap: clamp(2.5rem, 5vw, 5rem); }
+  .orrery-view { margin-inline: 0; }
+  .orrery-stage { aspect-ratio: 1.42; }
+  .orrery-tabs { grid-template-columns: minmax(0, 1fr); gap: 0.4rem; }
+  .orrery-tab { padding: 0.75rem 1.05rem; font-size: 0.95rem; }
+  .orrery-step[data-step="-1"] { left: 0.4rem; }
+  .orrery-step[data-step="1"] { right: 0.4rem; }
 }
 
-/* 10 · Testimonial: a quote card with a light travelling round its edge =========== */
-@property --angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+/* 10 · Testimonial: just the words, lighting up one by one as you read them ======= */
 .testimonial .section-inner { display: grid; justify-items: center; text-align: center; }
-.quote-card {
-  width: min(100%, 60rem); padding: clamp(2.6rem, 6vw, 4.4rem) clamp(1.4rem, 6vw, 5rem) clamp(2.2rem, 5vw, 3.2rem);
-  border-radius: 36px; border: 1px solid transparent;
-  background:
-    linear-gradient(170deg, rgba(28, 32, 68, 0.94), rgba(12, 14, 32, 0.94)) padding-box,
-    conic-gradient(from var(--angle), rgba(190, 200, 255, 0.16) 0 64%, var(--coral-hi) 76%, var(--sun) 82%, rgba(190, 200, 255, 0.16) 94%) border-box;
-  box-shadow: 0 60px 120px -60px #000, 0 0 140px -70px rgba(242, 85, 47, 0.5);
-  animation: edge-light 10s linear infinite paused;
+.testimonial-quote p {
+  max-width: 24ch; margin: 0 auto; font-family: var(--font-display); font-weight: 500; font-size: clamp(1.8rem, 4.4vw, 3.5rem);
+  line-height: 1.12; letter-spacing: -0.035em; text-wrap: balance;
 }
-.quote-card.is-live { animation-play-state: running; }
-@keyframes edge-light { to { --angle: 360deg; } }
-.quote-mark {
-  display: block; height: 0.4em; margin-bottom: 0.2em; font-family: var(--font-display); font-weight: 800; font-size: clamp(5.5rem, 9vw, 8rem); line-height: 0.95;
-  background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
-}
-.testimonial-quote p { max-width: 30ch; margin: 0 auto; font-family: var(--font-display); font-weight: 500; font-size: clamp(1.5rem, 2.9vw, 2.45rem); line-height: 1.22; letter-spacing: -0.028em; text-wrap: balance; }
-.testimonial-quote em { font-style: normal; color: var(--coral-hi); }
-/* lights up word by word as it scrolls into the reading zone (fully lit well before the middle) */
-.tq-w { opacity: calc(0.22 + 0.78 * clamp(0, (var(--tp, 1) * (var(--tn, 1) + 3) - var(--wi, 0)) / 3, 1)); }
-.quote-by { display: inline-flex; align-items: center; gap: 0.9rem; margin-top: 2.4rem; text-align: left; }
-.quote-avatar {
-  display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%; border: 1.5px solid transparent;
-  background: linear-gradient(var(--space-2), var(--space-2)) padding-box, var(--grad) border-box; font: 600 0.85rem/1 var(--font-mono); letter-spacing: 0.06em;
-}
-.quote-name { display: grid; gap: 0.1rem; }
-.quote-name strong { font-size: 1.02rem; }
-.quote-name span { font-size: 0.9rem; color: var(--text-dim); }
+/* fully lit well before the quote reaches the middle of the screen */
+.tq-w { opacity: calc(0.16 + 0.84 * clamp(0, (var(--tp, 1) * (var(--tn, 1) + 3) - var(--wi, 0)) / 3, 1)); }
+.quote-by { margin-top: clamp(1.8rem, 3vw, 2.6rem); font: 500 0.76rem/1.5 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-dim); }
+.quote-by strong { font-weight: 500; color: var(--text); }
 
 /* 11 · Contact ============================================================ */
 .contact-inner { padding-bottom: clamp(3rem, 6vw, 4.5rem); text-align: center; }
@@ -845,10 +867,7 @@ html.lb-open { overflow: hidden; }
   [data-reveal], .hero-wait [data-reveal] { opacity: 1 !important; translate: none !important; }
   .reveal-word > span { opacity: 1 !important; transform: none !important; animation: none !important; }
   [data-reveal].eyebrow::before { transform: none; }
-  .system-planet::after {
-    content: ""; position: absolute; left: 50%; top: 50%; width: calc(var(--slot) * 0.55); aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
-    background: radial-gradient(circle at 34% 30%, #fff 0 16%, var(--c) 16.5% 58%, color-mix(in srgb, var(--c) 40%, #10132A) 58.5%);
-  }
+  .orrery-map { display: block; }
   .about-bio strong { background-size: 100% 100%; }
   .nav-link.active { background: rgba(255, 255, 255, 0.1); }
   .shot[data-reveal] .shot-media { clip-path: none; }

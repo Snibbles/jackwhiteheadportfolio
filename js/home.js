@@ -1,6 +1,6 @@
 /* ============================================================
-   Home page sections: hero, marquee, crew badge, facts, work stack, testimonial and the contact headline.
-   (The toolbox planets are drawn by js/scene3d.js.) Uses the shared helpers from js/main.js (window.JW).
+   Home page sections: hero, marquee, crew badge, facts, work stack, toolbox, testimonial and the contact headline.
+   (The toolbox's solar system is drawn by js/scene3d.js.) Uses the shared helpers from js/main.js (window.JW).
    Every effect sleeps while its section is off screen, and stays still when motion is reduced.
    ============================================================ */
 (() => {
@@ -69,21 +69,48 @@
   });
 
   /* ----------------------------------------------------------
-     Crew badge: tilts toward the pointer, and the holographic foil follows the light
+     Crew badge: tilts and catches the light like a holographic card. A mouse over it points the light;
+     otherwise (and on every touch screen) the light follows the card as it travels up the screen.
+     Everything eases toward its target and goes to sleep once it's there.
   ---------------------------------------------------------- */
   run("crew", () => {
     const crew = document.querySelector(".crew");
-    if (!crew || reduce || !finePointer) return;
-    const card = crew.querySelector(".crew-card");
-    crew.addEventListener("pointermove", (e) => {
-      const r = crew.getBoundingClientRect();
-      const x = clamp((e.clientX - r.left) / r.width, 0, 1), y = clamp((e.clientY - r.top) / r.height, 0, 1);
-      card.style.setProperty("--ry", `${((x - 0.5) * 16).toFixed(2)}deg`);
-      card.style.setProperty("--rx", `${((0.5 - y) * 12).toFixed(2)}deg`);
-      card.style.setProperty("--px", (x * 100).toFixed(1));
-      card.style.setProperty("--py", (y * 100).toFixed(1));
+    if (!crew) return;
+    new IntersectionObserver(([e]) => crew.classList.toggle("is-away", !e.isIntersecting)).observe(crew);
+    if (reduce) return;
+    const card = crew.querySelector(".crew-card"), foil = crew.querySelector(".crew-foil"), glare = crew.querySelector(".crew-glare");
+    let w = 1, h = 1, top = 0, pointer = null;
+    const now = { x: 0.3, y: 0.3, rx: 0, ry: 0, k: 0.6 }, goal = { ...now };   // light position (0-1), tilt (deg), brightness (0-1)
+    onMeasure(() => { const r = card.getBoundingClientRect(); w = r.width; h = r.height; top = r.top + scrollY; });
+    const aim = () => {
+      if (pointer) Object.assign(goal, { x: pointer.x, y: pointer.y, rx: (0.5 - pointer.y) * 12, ry: (pointer.x - 0.5) * 16, k: 1 });
+      else {
+        const p = clamp((scrollY + innerHeight - top) / (innerHeight + h), 0, 1);   // 0: just in at the bottom, 1: about to leave at the top
+        Object.assign(goal, { x: 0.12 + 0.76 * p, y: 0.86 - 0.72 * p, rx: (0.5 - p) * 14, ry: (p - 0.5) * 9, k: 1 - Math.abs(p - 0.5) * 0.9 });
+      }
+    };
+    const wake = whileVisible(crew, (dt) => {
+      aim();
+      const ease = 1 - Math.exp(-dt * 8);
+      let moving = false;
+      for (const key in now) { const d = goal[key] - now[key]; now[key] += d * ease; if (Math.abs(d) > 0.002) moving = true; }
+      const dx = (now.x - 0.5) * w, dy = (now.y - 0.5) * h;
+      card.style.transform = `rotateX(${now.rx.toFixed(2)}deg) rotateY(${now.ry.toFixed(2)}deg)`;
+      foil.style.transform = `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0) rotate(${(now.ry * 4).toFixed(1)}deg)`;   // the stripes turn as it tilts
+      glare.style.transform = `translate3d(${(dx * 1.15).toFixed(1)}px, ${(dy * 1.15).toFixed(1)}px, 0)`;
+      foil.style.opacity = (0.08 + 0.16 * now.k).toFixed(3);
+      glare.style.opacity = (0.25 + 0.5 * now.k).toFixed(3);
+      return moving;
     });
-    crew.addEventListener("pointerleave", () => { card.style.setProperty("--rx", "0deg"); card.style.setProperty("--ry", "0deg"); });
+    onScroll(() => wake());
+    if (finePointer) {
+      crew.addEventListener("pointermove", (e) => {
+        const r = crew.getBoundingClientRect();
+        pointer = { x: clamp((e.clientX - r.left) / r.width, 0, 1), y: clamp((e.clientY - r.top) / r.height, 0, 1) };
+        wake();
+      });
+      crew.addEventListener("pointerleave", () => { pointer = null; wake(); });
+    }
   });
 
   /* ----------------------------------------------------------
@@ -138,25 +165,122 @@
       if (JW.lenis) JW.lenis.scrollTo(y, { immediate: true }); else scrollTo({ top: y, behavior: "instant" });
     });
     if (reduce) return;
-    onScroll(() => {
+    let from = 0, to = 0;                                          // the stretch of scrolling where the stack is on screen
+    onMeasure(() => { const r = stack.getBoundingClientRect(); from = r.top + scrollY - innerHeight; to = r.bottom + scrollY; });
+    onScroll((y) => {
       if (!pinned.matches) { panels.forEach((p) => p.style.removeProperty("--cover")); return; }
+      if (y < from || y > to) return;
+      const r = items.map((it) => it.getBoundingClientRect());     // all the reads first, then the writes: one layout per frame
       for (let i = 0; i < items.length - 1; i++) {
-        const a = items[i].getBoundingClientRect(), b = items[i + 1].getBoundingClientRect();
-        if (b.top > innerHeight) { panels[i].style.setProperty("--cover", "0"); continue; }
-        const cover = clamp((a.bottom - b.top) / Math.max(1, a.height - 14), 0, 1);
+        const cover = r[i + 1].top > innerHeight ? 0 : clamp((r[i].bottom - r[i + 1].top) / Math.max(1, r[i].height - 14), 0, 1);
         panels[i].style.setProperty("--cover", cover.toFixed(3));
       }
     });
   });
 
   /* ----------------------------------------------------------
-     Testimonial: the quote lights up word by word as it scrolls into the reading zone,
-     and the light round the card's edge only travels while the card is on screen
+     Toolbox: a small solar system, one planet per group of tools. Pick a group (a tab, the arrows, a swipe across the
+     system, or the planet itself) and the system turns to bring it forward while its tools show alongside.
+     This part owns the choice; js/scene3d.js draws the system and reports taps on planets ("orrery:pick").
+  ---------------------------------------------------------- */
+  run("orrery", () => {
+    const orrery = document.querySelector("[data-orrery]");
+    if (!orrery) return;
+    const view = orrery.querySelector(".orrery-view"), stage = orrery.querySelector(".orrery-stage");
+    const groups = orrery.querySelector(".orrery-groups"), panels = Array.from(groups.querySelectorAll(".orbit"));
+    const n = panels.length, two = (v) => String(v).padStart(2, "0");
+    let cur = 0;
+
+    // a tab per group, in its planet's colour
+    const tablist = document.createElement("div");
+    tablist.className = "orrery-tabs";
+    tablist.setAttribute("role", "tablist");
+    tablist.setAttribute("aria-label", "Tool groups");
+    const tabs = panels.map((panel, i) => {
+      const tab = document.createElement("button"), tools = panel.querySelectorAll(".orbit-tools li");
+      tab.type = "button";
+      tab.className = "orrery-tab";
+      tab.id = `tab-${panel.dataset.planet}`;
+      tab.setAttribute("role", "tab");
+      tab.setAttribute("aria-controls", panel.id);
+      tab.style.setProperty("--c", panel.style.getPropertyValue("--c"));
+      tab.append(panel.querySelector(".orbit-name").firstChild.textContent.trim());
+      const count = document.createElement("span");
+      count.className = "orrery-tab-n";
+      count.setAttribute("aria-hidden", "true");
+      count.textContent = two(tools.length);
+      tab.append(count);
+      tab.addEventListener("click", () => select(i));
+      panel.setAttribute("role", "tabpanel");
+      panel.setAttribute("aria-labelledby", tab.id);
+      panel.tabIndex = 0;
+      tools.forEach((li, k) => li.style.setProperty("--i", k));
+      tablist.append(tab);
+      return tab;
+    });
+    groups.prepend(tablist);
+
+    // stepping through: arrows and the position, under the system
+    const live = document.createElement("p");
+    live.className = "sr-only";
+    live.setAttribute("aria-live", "polite");
+    const pos = document.createElement("span");
+    pos.className = "orrery-pos";
+    pos.setAttribute("aria-hidden", "true");
+    const arrow = (dir, label) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "orrery-step";
+      b.dataset.step = dir;
+      b.setAttribute("aria-label", label);
+      b.innerHTML = `<span aria-hidden="true">${dir < 0 ? "←" : "→"}</span>`;
+      b.addEventListener("click", () => step(dir));
+      return b;
+    };
+    view.append(arrow(-1, "Previous group"), pos, arrow(1, "Next group"), live);
+    const step = (dir) => select((cur + dir + n) % n, { announce: true });
+
+    function select(i, { focus = false, announce = false } = {}) {
+      cur = i;
+      tabs.forEach((t, k) => { t.setAttribute("aria-selected", String(k === i)); t.tabIndex = k === i ? 0 : -1; });
+      panels.forEach((p, k) => { p.hidden = k !== i; });
+      pos.textContent = `${two(i + 1)} / ${two(n)}`;
+      stage.dataset.active = i;
+      stage.dispatchEvent(new CustomEvent("orrery:select", { detail: { index: i } }));
+      if (focus) tabs[i].focus();
+      // the arrows, a swipe or a planet change the group without moving focus, so say what's showing now
+      if (announce) live.textContent = `${tabs[i].firstChild.textContent}: ${Array.from(panels[i].querySelectorAll("li"), (li) => li.textContent).join(", ")}`;
+    }
+
+    // keyboard, as in any tab list: left and right move between groups, Home and End jump to the ends
+    tablist.addEventListener("keydown", (e) => {
+      const to = { ArrowRight: cur + 1, ArrowLeft: cur - 1, Home: 0, End: n - 1 }[e.key];
+      if (to === undefined) return;
+      e.preventDefault();
+      select((to + n) % n, { focus: true });
+    });
+
+    // a sideways swipe across the system steps to the next or previous group (up and down still scroll the page)
+    let start = null;
+    view.addEventListener("pointerdown", (e) => { if (e.pointerType !== "mouse") start = [e.clientX, e.clientY]; });
+    view.addEventListener("pointercancel", () => { start = null; });
+    view.addEventListener("pointerup", (e) => {
+      if (!start) return;
+      const dx = e.clientX - start[0], dy = e.clientY - start[1];
+      start = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.4) step(dx < 0 ? 1 : -1);
+    });
+    stage.addEventListener("orrery:pick", (e) => { if (e.detail.index !== cur) select(e.detail.index, { announce: true }); });
+
+    orrery.classList.add("is-ready");
+    select(0);
+  });
+
+  /* ----------------------------------------------------------
+     Testimonial: the quote lights up word by word as it scrolls into the reading zone
   ---------------------------------------------------------- */
   run("testimonial", () => {
-    const card = document.querySelector(".quote-card");
     const q = document.querySelector(".testimonial-quote p");
-    if (card && !reduce) new IntersectionObserver(([e]) => card.classList.toggle("is-live", e.isIntersecting)).observe(card);
     if (!q || reduce) return;
     const sentence = q.textContent.replace(/\s+/g, " ").trim();
     const visual = document.createElement("span");

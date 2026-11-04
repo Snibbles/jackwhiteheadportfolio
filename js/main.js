@@ -37,7 +37,7 @@
   const JW = (window.JW = {
     reduce, finePointer, clamp, onScreen, run, onceVisible, measure,
     onScroll: (f) => fx.push(f), onMeasure: (f) => measures.push(f), onReveal: (f) => revealHooks.push(f),
-    lenis: null,
+    lenis: null, stepScroll: null,
   });
 
   /* ----------------------------------------------------------
@@ -76,21 +76,21 @@
   });
 
   /* ----------------------------------------------------------
-     Reveal on scroll (staggered inside groups). The hero never waits for a scroll.
+     Reveal on scroll (staggered inside groups). The hero never waits for a scroll, and with reduced motion nothing waits at all.
   ---------------------------------------------------------- */
   run("reveal", () => {
     document.querySelectorAll("[data-reveal]").forEach((el) => {
-      const group = el.parentElement && el.parentElement.closest(".about-grid, .systems, .gallery, .shot-pair, .project-duo");
+      const group = el.parentElement && el.parentElement.closest(".about-grid, .orrery, .gallery, .shot-pair, .project-duo");
       const index = group ? Array.from(group.querySelectorAll("[data-reveal]")).indexOf(el) : 0;
       el.style.setProperty("--reveal-delay", reduce ? "0s" : `${Math.min(index, 5) * 0.09}s`);
       const show = () => { el.classList.add("is-visible"); revealHooks.forEach((h) => h(el)); };
-      if (el.closest(".hero")) show();
+      if (reduce || el.closest(".hero")) show();
       else onceVisible(el, show);
     });
   });
 
   /* ----------------------------------------------------------
-     Header: a glass bar once you leave the hero, and a reading-progress hairline
+     Header: a dark bar once you leave the hero, and a reading-progress hairline
   ---------------------------------------------------------- */
   run("header", () => {
     const header = document.getElementById("site-header");
@@ -193,7 +193,13 @@
   run("smooth-scroll", () => {
     if (reduce) return;
     import("https://cdn.jsdelivr.net/npm/lenis@1.3.19/dist/lenis.mjs").then(({ default: Lenis }) => {
-      JW.lenis = new Lenis({ lerp: 0.1, autoRaf: true, allowNestedScroll: true, prevent: (node) => !!(node.closest && node.closest(".lightbox, .mobile-menu")) });
+      JW.lenis = new Lenis({ lerp: 0.13, allowNestedScroll: true, prevent: (node) => !!(node.closest && node.closest(".lightbox, .mobile-menu")) });
+      // One step per frame. The 3D layer takes it first when it draws (js/scene3d.js), so the scene and the page never drift a frame apart;
+      // this loop covers every frame it doesn't. A second call in the same frame is ignored.
+      let stepped = -1;
+      JW.stepScroll = (t) => { if (t !== stepped) { stepped = t; JW.lenis.raf(t); } };
+      const tick = (t) => { JW.stepScroll(t); requestAnimationFrame(tick); };
+      requestAnimationFrame(tick);
     }).catch(() => {});
 
     document.addEventListener("click", (e) => {
@@ -455,7 +461,9 @@
     const named = () => document.querySelectorAll("[data-vt]");
     const nameOnScreen = () => named().forEach((el) => { el.style.viewTransitionName = onScreen(el) ? `vt-${el.dataset.vt}` : ""; });
     const clear = () => named().forEach((el) => { el.style.viewTransitionName = ""; });
-    addEventListener("pageswap", (e) => { if (e.viewTransition) nameOnScreen(); });
+    // a transition the browser drops (going back to a page kept in memory, a hidden tab) rejects its promises, on both pages: that's fine
+    const settled = (vt) => [vt.updateCallbackDone, vt.ready, vt.finished].forEach((p) => p && p.catch(() => {}));
+    addEventListener("pageswap", (e) => { if (e.viewTransition) { settled(e.viewTransition); nameOnScreen(); } });
     addEventListener("pageshow", (e) => { if (e.persisted) clear(); });
     addEventListener("pagereveal", (e) => {
       if (!e.viewTransition) return;
@@ -464,9 +472,8 @@
       document.querySelectorAll("[data-reveal]:not(.is-visible)").forEach((el) => {
         if (el.querySelector("[data-vt]") && onScreen(el)) { el.classList.add("reveal-instant", "is-visible"); shown.push(el); }
       });
-      // a transition the browser skips (say, the tab was hidden) rejects its promises: tidy up either way
       const done = () => { clear(); shown.forEach((el) => el.classList.remove("reveal-instant")); };
-      e.viewTransition.ready.catch(() => {});
+      settled(e.viewTransition);
       e.viewTransition.finished.then(done, done);
     });
   });
