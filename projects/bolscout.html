@@ -25,9 +25,9 @@
 <link rel="apple-touch-icon" href="../apple-touch-icon.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=16">
-<link rel="stylesheet" href="../css/v2.css?v=18">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css?v=1">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
@@ -35,7 +35,7 @@
 } }
 </script>
 </head>
-<body class="page-sub">
+<body>
 
 <div id="scene3d" class="scene3d" aria-hidden="true"></div>
 
@@ -43,9 +43,7 @@
 
 <header class="site-header scrolled" id="site-header">
   <div class="header-inner">
-    <a class="logo" href="../index.html">
-      JW<span class="logo-dot">.</span>
-    </a>
+    <a class="logo" href="../index.html" aria-label="Jack Whitehead, home">JW<span class="logo-dot">.</span></a>
     <nav class="nav" id="nav" aria-label="Primary">
       <ul>
         <li><a href="../index.html#about" class="nav-link">About</a></li>
@@ -76,8 +74,8 @@
   <section class="project-hero">
     <div class="section-inner project-hero-inner">
       <a class="back-link" href="../projects.html">← All projects</a>
-      <p class="eyebrow eyebrow-hero">Product Design · UI / Data Viz</p>
-      <h1 class="project-title">Bolscout</h1>
+      <p class="eyebrow">Product Design · UI / Data Viz</p>
+      <h1 class="project-title" data-split>Bolscout</h1>
       <p class="project-summary">Bolscout is a dashboard for sellers on Bol.com. Instead of digging through spreadsheets, a seller gets revenue, costs, profit and per-product performance on one screen. We designed it as a duo.</p>
       <dl class="project-meta">
       <div><dt>Role</dt><dd>Product design, data viz</dd></div>
@@ -85,7 +83,7 @@
       <div><dt>For</dt><dd>A client project</dd></div>
       <div><dt>Tools</dt><dd>Figma, Illustrator</dd></div>
       </dl>
-      <div class="project-cover">
+      <div class="project-cover" data-vt="bolscout">
         <img src="../images/projects/bolscout/cover.jpg" alt="The Bolscout dashboard in two browser windows: six key numbers, a line chart and a bar chart" width="1800" height="1179">
       </div>
     </div>
@@ -94,10 +92,10 @@
   <section class="project-block">
     <div class="section-inner">
       <div class="project-block-head">
-        <p class="eyebrow reveal" data-reveal>the dashboard</p>
-        <h2 class="section-title reveal" data-reveal>Everything a seller checks, on one screen.</h2>
-        <p class="project-text reveal" data-reveal>The overview screen follows the brief: filters at the top, six key numbers beneath them, then charts and a per-product breakdown.</p>
-        <ul class="project-points reveal" data-reveal>
+        <p class="eyebrow" data-reveal>the dashboard</p>
+        <h2 class="section-title" data-split>Everything a seller checks, on one screen.</h2>
+        <p class="project-text" data-reveal>The overview screen follows the brief: filters at the top, six key numbers beneath them, then charts and a per-product breakdown.</p>
+        <ul class="project-points" data-reveal>
           <li>Filters for the period, the country and the store sit at the top.</li>
           <li>Six large numbers: revenue, costs, profit, orders, sales and returns.</li>
           <li>A line chart tracks revenue, costs and profit; a bar chart shows products sold per day.</li>
@@ -105,7 +103,7 @@
         </ul>
       </div>
       <div class="shot-stack">
-        <figure class="shot " data-reveal>
+        <figure class="shot" data-reveal>
             <div class="shot-media"><img src="../images/projects/bolscout/dashboard.jpg" alt="The Bolscout overview dashboard" width="2000" height="996" loading="lazy"></div>
             <figcaption>The overview screen. All figures are placeholder data for a demo store.</figcaption>
           </figure>
@@ -116,16 +114,16 @@
   <section class="project-block project-block-alt">
     <div class="section-inner">
       <div class="project-block-head">
-        <p class="eyebrow reveal" data-reveal>up close</p>
-        <h2 class="section-title reveal" data-reveal>Numbers first, charts second.</h2>
-        <p class="project-text reveal" data-reveal>Each key number gets large type and its own icon so it reads at a glance, and the line chart gives revenue, costs and profit one colour each.</p>
+        <p class="eyebrow" data-reveal>up close</p>
+        <h2 class="section-title" data-split>Numbers first, charts second.</h2>
+        <p class="project-text" data-reveal>Each key number gets large type and its own icon so it reads at a glance, and the line chart gives revenue, costs and profit one colour each.</p>
       </div>
       <div class="shot-stack">
-        <figure class="shot " data-reveal>
+        <figure class="shot" data-reveal>
             <div class="shot-media"><img src="../images/projects/bolscout/numbers.jpg" alt="Six Bolscout key number cards" width="2000" height="448" loading="lazy"></div>
             <figcaption>The six key numbers.</figcaption>
           </figure>
-        <figure class="shot " data-reveal>
+        <figure class="shot" data-reveal>
             <div class="shot-media"><img src="../images/projects/bolscout/charts.jpg" alt="Bolscout line chart and bar chart" width="2000" height="513" loading="lazy"></div>
             <figcaption>Revenue, costs and profit over time, and products sold per day.</figcaption>
           </figure>
@@ -136,9 +134,9 @@
   <section class="project-block">
     <div class="section-inner">
       <div class="project-block-head">
-        <p class="eyebrow reveal" data-reveal>looking back</p>
-        <h2 class="section-title reveal" data-reveal>What I&#x27;d do differently.</h2>
-        <p class="project-text reveal" data-reveal>I&#x27;d research more ways to simplify complex financial information without losing depth.</p>
+        <p class="eyebrow" data-reveal>looking back</p>
+        <h2 class="section-title" data-split>What I&#x27;d do differently.</h2>
+        <p class="project-text" data-reveal>I&#x27;d research more ways to simplify complex financial information without losing depth.</p>
       </div>
     </div>
   </section>
@@ -146,8 +144,8 @@
   <section class="next-project">
     <div class="section-inner">
       <div>
-        <p class="eyebrow eyebrow-light">next up</p>
-        <a class="next-link" href="qualiko.html"><span class="next-thumb" aria-hidden="true"><img src="../images/projects/qualiko/cover-card.jpg" alt="" width="1200" height="786" loading="lazy" decoding="async"></span><span>Qualiko Recipe Book</span><span aria-hidden="true">→</span></a>
+        <p class="eyebrow">Next up</p>
+        <a class="next-link" href="qualiko.html"><span class="next-thumb" aria-hidden="true" data-vt="qualiko"><img src="../images/projects/qualiko/cover-card.jpg" alt="" width="1200" height="786" loading="lazy" decoding="async"></span><span>Qualiko Recipe Book</span><span aria-hidden="true">→</span></a>
       </div>
       <a class="btn btn-ghost" href="../projects.html">All projects</a>
     </div>
@@ -156,14 +154,18 @@
 </main>
 
 <footer class="site-footer">
-  <div class="section-inner footer-inner">
-    <p class="footer-copy"><span class="footer-mark" aria-hidden="true">JW<span class="logo-dot">.</span></span>Jack Whitehead © 2026</p>
-    <p class="footer-clock" hidden><span>Amsterdam<span class="sr-only">, local time</span></span><time>--:--</time></p>
-    <a href="#top" class="back-to-top">Back to top <span class="back-to-top-arrow" aria-hidden="true">↑</span></a>
+  <div class="horizon" aria-hidden="true"><div class="horizon-planet"></div></div>
+  <div class="footer-body">
+    <p class="wordmark" aria-hidden="true">Jack Whitehead</p>
+    <div class="footer-inner">
+      <p class="footer-copy">© 2026 Jack Whitehead</p>
+      <p class="footer-clock" hidden><span>Amsterdam<span class="sr-only">, local time</span></span><time>--:--</time></p>
+      <a href="#top" class="back-to-top">Back to top <span class="back-to-top-arrow" aria-hidden="true">↑</span></a>
+    </div>
   </div>
 </footer>
 
-<script src="../js/main.js?v=11"></script>
-<script type="module" src="../js/scene3d.js?v=33"></script>
+<script src="../js/main.js?v=12"></script>
+<script type="module" src="../js/scene3d.js?v=34"></script>
 </body>
 </html>

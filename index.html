@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
-/* hold the page's own chrome back until the 3D landing is ready (first visit only). If the 3D layer fails to load, the page appears normally instead. */
+/* First visit: the page waits for the 3D landing. Coming back, arriving on a link like /#contact, or preferring less motion: no waiting.
+   If the 3D layer fails to load, the page simply appears. */
 (function (d) {
-  /* the landing plays once per visit. Coming back, arriving on a link like /#contact, or preferring less motion: no waiting. */
   var skip = false;
   try { skip = sessionStorage.getItem('jw-landed') === '1'; } catch (e) {}
   if (location.hash.length > 1 || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) skip = true;
@@ -43,9 +43,9 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=16">
-<link rel="stylesheet" href="css/v2.css?v=18">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css?v=1">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
@@ -58,14 +58,11 @@
 <div id="scene3d" class="scene3d" aria-hidden="true"></div>
 <div class="launch-meter" id="launch-meter" aria-hidden="true"><span id="launch-text">Preparing launch 0%</span><span class="launch-track"><i id="launch-bar"></i></span></div>
 
-
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="site-header" id="site-header">
   <div class="header-inner">
-    <a class="logo" href="#top">
-      JW<span class="logo-dot">.</span>
-    </a>
+    <a class="logo" href="#top" aria-label="Jack Whitehead, back to the top">JW<span class="logo-dot">.</span></a>
     <nav class="nav" id="nav" aria-label="Primary">
       <ul>
         <li><a href="#about" class="nav-link">About</a></li>
@@ -94,22 +91,19 @@
 
 <main id="main">
 
-  <!-- HERO -->
-  <section class="hero hero-wait" id="top">
+  <!-- HERO: the 3D head lands on its asteroid (js/scene3d.js) -->
+  <section class="hero hero-wait" id="top" aria-labelledby="hero-title">
     <div class="hero-inner">
       <div class="hero-copy">
-        <p class="status-pill reveal" data-reveal><span class="status-dot"></span>Open to internships &amp; junior roles, 2027</p>
-
-        <h1 class="hero-title">
+        <p class="status-pill" data-reveal><span class="status-dot" aria-hidden="true"></span>Open to internships &amp; junior roles, 2027</p>
+        <h1 class="hero-title" id="hero-title">
           <span class="hero-line hero-line-1"><span class="reveal-word" style="--i:0"><span>Jack</span></span> <span class="reveal-word" style="--i:1"><span>Whitehead</span></span></span>
           <span class="hero-line hero-line-2"><span class="reveal-word" style="--i:2"><span>digital</span></span> <span class="reveal-word" style="--i:3"><span>designer,</span></span> <span class="reveal-word" style="--i:4"><span>always</span></span> <span class="reveal-word" style="--i:5"><span>in</span></span> <span class="reveal-word" style="--i:6"><span>motion</span></span></span>
         </h1>
-
-        <p class="hero-sub reveal" data-reveal>
+        <p class="hero-sub" data-reveal>
           I'm a digital designer focused on UX/UI, and I genuinely enjoy the whole process. Sketching ideas in Figma, building them in code (HTML, CSS, JavaScript), or bringing them to life in Adobe.
         </p>
-
-        <div class="hero-cta reveal" data-reveal>
+        <div class="hero-cta" data-reveal>
           <a href="#work" class="btn btn-primary" data-magnetic>See my work <span class="btn-arrow-down" aria-hidden="true">↓</span></a>
           <a href="#contact" class="btn btn-ghost" data-magnetic>Let's talk</a>
         </div>
@@ -122,16 +116,21 @@
     </div>
   </section>
 
-  <!-- ABOUT -->
-  <section class="about" id="about">
+  <!-- what I do, as a band that drifts with the scroll -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <p class="marquee-group"><span>Digital designer</span><i>✦</i><span class="is-outline">UX / UI</span><i>✦</i><span>Web design</span><i>✦</i><span class="is-outline">Motion</span><i>✦</i><span>Print &amp; brand</span><i>✦</i><span class="is-outline">Amsterdam</span><i>✦</i></p>
+    </div>
+  </div>
+
+  <!-- ABOUT: a holographic crew badge, the story, and the numbers -->
+  <section class="about" id="about" aria-labelledby="about-title">
     <div class="section-inner">
-      <p class="eyebrow reveal" data-reveal>About</p>
-      <h2 class="section-title reveal" data-reveal>
-        Still early.<br> <span class="grad">Already building.</span>
-      </h2>
+      <p class="eyebrow" data-reveal>About</p>
+      <h2 class="section-title" id="about-title" data-split>Still early.<br> <span class="grad">Already building.</span></h2>
 
       <div class="about-grid">
-        <div class="crew reveal" data-reveal>
+        <div class="crew" data-reveal>
           <div class="crew-orbit-wrap" aria-hidden="true">
             <svg class="crew-orbit" viewBox="0 0 608 322" preserveAspectRatio="none"><path d="M6 161 a298 155 0 1 0 596 0 a298 155 0 1 0 -596 0"/></svg>
             <i class="crew-moon"></i>
@@ -143,6 +142,8 @@
               <img src="images/jw-about.jpg" alt="Jack Whitehead in a navy t-shirt, standing in front of a wooden slat wall" width="1067" height="1427" loading="lazy">
             </picture>
             <figcaption class="crew-bottom"><strong>Jack Whitehead</strong><span>Digital designer &middot; Amsterdam</span></figcaption>
+            <span class="crew-foil" aria-hidden="true"></span>
+            <span class="crew-glare" aria-hidden="true"></span>
           </figure>
           <svg class="crew-patch" viewBox="0 0 120 120" aria-hidden="true">
             <defs><path id="patch-path" d="M60 60m-42 0a42 42 0 1 1 84 0a42 42 0 1 1 -84 0"/></defs>
@@ -154,206 +155,199 @@
         </div>
 
         <div class="about-copy">
-          <p class="about-bio reveal" data-reveal>
+          <p class="about-bio" data-reveal>
             I have been studying <strong>digital design for 3 years</strong> so far, and I've learned a lot. On top of that I've worked at <strong>Brandium and Airworks</strong>, where I learned that <strong>good work happens in teams</strong>. I actually listen to feedback and use it to get better fast. I'm bilingual (English/Dutch), based in Amsterdam, studying at HvA, 21, and I'm here to do solid work and help make the people around me better at their jobs too.
           </p>
-
-          <dl class="about-facts reveal" data-reveal>
+          <dl class="about-facts" data-reveal>
             <div><dt>Base</dt><dd>Amsterdam</dd></div>
             <div><dt>Languages</dt><dd>English &middot; Dutch</dd></div>
             <div><dt>Worked at</dt><dd>Brandium &middot; Airworks</dd></div>
           </dl>
-
-          <div class="stat-grid">
-            <div class="stat-card reveal" data-reveal style="--c: var(--cobalt)">
-              <span class="stat-kicker">Study</span>
-              <span class="stat-number">4th<span class="stat-suffix">yr</span></span>
-              <span class="stat-label">HvA - Communication and Multimedia Design</span>
-            </div>
-            <div class="stat-card stat-card-accent reveal" data-reveal>
-              <span class="stat-kicker">Shipped</span>
-              <span class="stat-number">6</span>
-              <span class="stat-label">Client projects shipped so far</span>
-            </div>
-            <div class="stat-card reveal" data-reveal style="--c: var(--sunshine)">
-              <span class="stat-kicker">Daily</span>
-              <span class="stat-number">3</span>
-              <span class="stat-label">Tools I use daily</span>
-              <a href="#skills" class="stat-card-hint">See what else I know &darr;</a>
-            </div>
-            <div class="stat-card reveal" data-reveal style="--c: var(--mint)">
-              <span class="stat-kicker">Status</span>
-              <span class="stat-number stat-number-small">Open to</span>
-              <span class="stat-label">Internships &amp; junior roles, 2027</span>
-            </div>
-          </div>
         </div>
       </div>
+
+      <ul class="stats">
+        <li class="stat" data-reveal>
+          <p class="stat-kicker" aria-hidden="true">Study</p>
+          <p class="stat-num" aria-hidden="true" data-odo>04</p>
+          <p class="stat-label"><span class="sr-only">Fourth </span>Year at HvA, Communication &amp; Multimedia Design</p>
+        </li>
+        <li class="stat" data-reveal>
+          <p class="stat-kicker" aria-hidden="true">Shipped</p>
+          <p class="stat-num" aria-hidden="true" data-odo>06</p>
+          <p class="stat-label"><span class="sr-only">6 </span>Client projects shipped so far</p>
+        </li>
+        <li class="stat" data-reveal>
+          <p class="stat-kicker" aria-hidden="true">Daily</p>
+          <p class="stat-num" aria-hidden="true" data-odo>03</p>
+          <p class="stat-label"><span class="sr-only">3 </span>Tools I use daily. <a class="stat-link" href="#skills">See what else I know&nbsp;↓</a></p>
+        </li>
+        <li class="stat stat-live" data-reveal>
+          <p class="stat-kicker" aria-hidden="true"><span class="status-dot"></span>Status</p>
+          <p class="stat-num" aria-hidden="true" data-odo>2027</p>
+          <p class="stat-label">Open to internships &amp; junior roles<span class="sr-only"> in 2027</span></p>
+        </li>
+      </ul>
     </div>
   </section>
 
-  <!-- WORK -->
-  <section class="work" id="work">
+  <!-- WORK: each project pins and the next slides over it -->
+  <section class="work" id="work" aria-labelledby="work-title">
     <div class="section-inner">
-      <p class="eyebrow reveal" data-reveal>Recent work</p>
-      <h2 class="section-title reveal" data-reveal>Things I've made recently</h2>
-      <p class="section-sub reveal" data-reveal>
-        My latest designs, videos and tools.
-        Tap a project for the full story.
-      </p>
-
-      <div class="work-grid">
-
-        <a class="work-card work-card-link reveal" data-reveal href="projects/buckfiets.html" style="--tilt:-2deg">
-          <span class="work-card-visual work-visual-1">
-            <img
-              src="images/projects/buckfiets/cover-card.jpg"
-              alt="The Buckfiets landing page on a laptop and a phone, on an orange background"
-              class="work-card-visual-img work-card-visual-img-fit"
-              width="1200" height="786"
-              loading="lazy"
-            >
-          </span>
-          <span class="work-card-body">
-            <span class="work-card-tag">Web · Print · Motion</span>
-            <span class="work-card-title">Buckfiets</span>
-            <span class="work-card-desc">A landing page, flyers and saddle covers for a startup that pays cargo-bike owners to carry ads</span>
-          </span>
-        </a>
-
-        <a class="work-card work-card-link reveal" data-reveal href="projects/coravin.html" style="--tilt:1.5deg">
-          <span class="work-card-visual work-visual-2">
-            <img
-              src="images/projects/coravin/cover-card.jpg"
-              alt="Three vertical Coravin video frames: a wine pour with a title, champagne being opened, and a gift being wrapped"
-              class="work-card-visual-img work-card-visual-img-fit"
-              width="1200" height="786"
-              loading="lazy"
-            >
-          </span>
-          <span class="work-card-body">
-            <span class="work-card-tag">Video · Edit &amp; sound</span>
-            <span class="work-card-title">Coravin</span>
-            <span class="work-card-desc">Vertical social videos for Coravin, edited from a brief by Butterfly Studio</span>
-          </span>
-        </a>
-
-        <a class="work-card work-card-link reveal" data-reveal href="projects/projects-amsterdam.html" style="--tilt:-1.5deg">
-          <span class="work-card-visual work-visual-3">
-            <img
-              src="images/projects/projects-amsterdam/cover-card.jpg"
-              alt="Two browser windows showing the Projects Amsterdam kitchen and bathroom pages"
-              class="work-card-visual-img work-card-visual-img-fit"
-              width="1200" height="786"
-              loading="lazy"
-            >
-          </span>
-          <span class="work-card-body">
-            <span class="work-card-tag">Web design</span>
-            <span class="work-card-title">Projects Amsterdam</span>
-            <span class="work-card-desc">Website pages for an Amsterdam renovation and interiors firm, built around their photography</span>
-          </span>
-        </a>
-
-        <a class="work-card work-card-link reveal" data-reveal href="projects/seo.html" style="--tilt:2deg">
-          <span class="work-card-visual work-visual-4">
-            <img
-              src="images/projects/seo/cover-card.jpg"
-              alt="A Google Sheets dashboard and a scored list of link prospects"
-              class="work-card-visual-img work-card-visual-img-fit"
-              width="1200" height="786"
-              loading="lazy"
-            >
-          </span>
-          <span class="work-card-body">
-            <span class="work-card-tag">SEO · Automation</span>
-            <span class="work-card-title">SEO link-building tool</span>
-            <span class="work-card-desc">A Google Sheets tool that finds, scores and tracks link-building prospects for clients</span>
-          </span>
-        </a>
-
+      <div class="section-head">
+        <div>
+          <p class="eyebrow" data-reveal>Recent work</p>
+          <h2 class="section-title" id="work-title" data-split>Things I've made recently</h2>
+        </div>
+        <p class="section-sub" data-reveal>My latest designs, videos and tools. Tap a project for the full story.</p>
       </div>
-
-      <div class="work-more reveal" data-reveal>
-        <a href="projects.html" class="btn btn-primary" data-magnetic>See all projects <span class="btn-arrow" aria-hidden="true">→</span></a>
+      <ol class="stack">
+        <li class="stack-item" style="--tint: #F0802F">
+          <article class="panel" data-cursor="View">
+            <div class="panel-media" data-vt="buckfiets">
+              <img src="images/projects/buckfiets/cover-card.jpg" alt="The Buckfiets landing page on a laptop and a phone, on an orange background" width="1200" height="786" loading="lazy" decoding="async">
+            </div>
+            <div class="panel-body">
+              <p class="panel-count" aria-hidden="true"><span>01</span> / 04</p>
+              <p class="panel-tags">Web · Print · Motion</p>
+              <h3 class="panel-title"><a href="projects/buckfiets.html">Buckfiets</a></h3>
+              <p class="panel-desc">A landing page, flyers and saddle covers for a startup that pays cargo-bike owners to carry ads.</p>
+              <dl class="panel-meta"><div><dt>Role</dt><dd>Brand, web &amp; print design</dd></div><div><dt>For</dt><dd>Buckfiets, via Klein Media</dd></div></dl>
+              <span class="panel-cta" aria-hidden="true">View case study <span class="panel-cta-arrow">→</span></span>
+            </div>
+            <span class="panel-num" aria-hidden="true">01</span>
+          </article>
+        </li>
+        <li class="stack-item" style="--tint: #B23A48">
+          <article class="panel" data-cursor="View">
+            <div class="panel-media" data-vt="coravin">
+              <img src="images/projects/coravin/cover-card.jpg" alt="Three vertical Coravin video frames: a wine pour with a title, champagne being opened, and a gift being wrapped" width="1200" height="786" loading="lazy" decoding="async">
+            </div>
+            <div class="panel-body">
+              <p class="panel-count" aria-hidden="true"><span>02</span> / 04</p>
+              <p class="panel-tags">Video · Edit &amp; sound</p>
+              <h3 class="panel-title"><a href="projects/coravin.html">Coravin</a></h3>
+              <p class="panel-desc">Vertical social videos for Coravin, edited from a brief by Butterfly Studio.</p>
+              <dl class="panel-meta"><div><dt>Role</dt><dd>Edit &amp; sound</dd></div><div><dt>For</dt><dd>Coravin, brief by Butterfly Studio</dd></div></dl>
+              <span class="panel-cta" aria-hidden="true">View case study <span class="panel-cta-arrow">→</span></span>
+            </div>
+            <span class="panel-num" aria-hidden="true">02</span>
+          </article>
+        </li>
+        <li class="stack-item" style="--tint: #C9A45C">
+          <article class="panel" data-cursor="View">
+            <div class="panel-media" data-vt="projects-amsterdam">
+              <img src="images/projects/projects-amsterdam/cover-card.jpg" alt="Two browser windows showing the Projects Amsterdam kitchen and bathroom pages" width="1200" height="786" loading="lazy" decoding="async">
+            </div>
+            <div class="panel-body">
+              <p class="panel-count" aria-hidden="true"><span>03</span> / 04</p>
+              <p class="panel-tags">Web design</p>
+              <h3 class="panel-title"><a href="projects/projects-amsterdam.html">Projects Amsterdam</a></h3>
+              <p class="panel-desc">Website pages for an Amsterdam renovation and interiors firm, built around their photography.</p>
+              <dl class="panel-meta"><div><dt>Role</dt><dd>Web design &amp; UX</dd></div><div><dt>For</dt><dd>Projects Amsterdam, via Klein Media</dd></div></dl>
+              <span class="panel-cta" aria-hidden="true">View case study <span class="panel-cta-arrow">→</span></span>
+            </div>
+            <span class="panel-num" aria-hidden="true">03</span>
+          </article>
+        </li>
+        <li class="stack-item" style="--tint: #3D63F5">
+          <article class="panel" data-cursor="View">
+            <div class="panel-media" data-vt="seo">
+              <img src="images/projects/seo/cover-card.jpg" alt="A Google Sheets dashboard and a scored list of link prospects" width="1200" height="786" loading="lazy" decoding="async">
+            </div>
+            <div class="panel-body">
+              <p class="panel-count" aria-hidden="true"><span>04</span> / 04</p>
+              <p class="panel-tags">SEO · Automation</p>
+              <h3 class="panel-title"><a href="projects/seo.html">SEO link-building tool</a></h3>
+              <p class="panel-desc">A Google Sheets tool that finds, scores and tracks link-building prospects for clients.</p>
+              <dl class="panel-meta"><div><dt>Role</dt><dd>Design &amp; build</dd></div><div><dt>For</dt><dd>Client campaigns at Klein Media</dd></div></dl>
+              <span class="panel-cta" aria-hidden="true">View case study <span class="panel-cta-arrow">→</span></span>
+            </div>
+            <span class="panel-num" aria-hidden="true">04</span>
+          </article>
+        </li>
+      </ol>
+      <div class="work-more" data-reveal>
+        <a href="projects.html" class="btn btn-primary" data-magnetic>See all 8 projects <span class="btn-arrow" aria-hidden="true">→</span></a>
       </div>
     </div>
   </section>
 
-  <!-- SKILLS -->
-  <section class="skills" id="skills">
+  <!-- SKILLS: tools in orbit (a plain grouped list on small screens) -->
+  <section class="skills" id="skills" aria-labelledby="skills-title">
     <div class="section-inner">
-      <p class="eyebrow eyebrow-light reveal" data-reveal>Tools &amp; skills</p>
-      <h2 class="section-title section-title-light reveal" data-reveal>In the toolbox</h2>
-
-      <div class="skills-grid">
-        <div class="skills-group reveal" data-reveal>
-          <h3 class="skills-group-title">Design</h3>
-          <ul class="chip-list">
-            <li class="chip">Figma</li>
-            <li class="chip">Adobe XD</li>
-            <li class="chip">Illustrator</li>
-            <li class="chip">Photoshop</li>
-            <li class="chip">Miro</li>
-            <li class="chip">Notion</li>
+      <div class="section-head section-head-center">
+        <p class="eyebrow" data-reveal>Tools &amp; skills</p>
+        <h2 class="section-title" id="skills-title" data-split>In the toolbox</h2>
+        <p class="section-sub" data-reveal>Sixteen tools and skills in four orbits. Point at a group to bring it forward.</p>
+      </div>
+      <div class="orbits" data-reveal>
+        <div class="orbits-stage">
+          <div class="orbits-core" aria-hidden="true"><span class="core-num">16</span><span class="core-label">in orbit</span></div>
+          <ul class="ring" data-group="frontend" aria-label="Front-end basics" style="--r: 11.5; --tilt: 54deg; --roll: -16deg; --dur: 44s; --c: var(--mint); --n: 2">
+            <li style="--i: 0">HTML &amp; CSS</li>
+            <li style="--i: 1">A little JavaScript</li>
+          </ul>
+          <ul class="ring" data-group="motion" aria-label="Prototyping &amp; motion" style="--r: 18.5; --tilt: 60deg; --roll: 12deg; --dur: 62s; --dir: reverse; --c: var(--sun); --n: 3">
+            <li style="--i: 0">Premiere Pro</li>
+            <li style="--i: 1">After Effects</li>
+            <li style="--i: 2">Jitter</li>
+          </ul>
+          <ul class="ring" data-group="design" aria-label="Design" style="--r: 25.5; --tilt: 63deg; --roll: -7deg; --dur: 86s; --c: var(--coral); --n: 6">
+            <li style="--i: 0">Figma</li>
+            <li style="--i: 1">Adobe XD</li>
+            <li style="--i: 2">Illustrator</li>
+            <li style="--i: 3">Photoshop</li>
+            <li style="--i: 4">Miro</li>
+            <li style="--i: 5">Notion</li>
+          </ul>
+          <ul class="ring" data-group="theory" aria-label="Theory" style="--r: 32.5; --tilt: 66deg; --roll: 6deg; --dur: 118s; --dir: reverse; --c: var(--cobalt); --n: 5">
+            <li style="--i: 0">User research</li>
+            <li style="--i: 1">Wireframing</li>
+            <li style="--i: 2">Design systems</li>
+            <li style="--i: 3">Accessibility basics</li>
+            <li style="--i: 4">User testing / prototyping</li>
           </ul>
         </div>
-        <div class="skills-group reveal" data-reveal>
-          <h3 class="skills-group-title">Prototyping &amp; motion</h3>
-          <ul class="chip-list">
-            <li class="chip">Premiere Pro</li>
-            <li class="chip">After Effects</li>
-            <li class="chip">Jitter</li>
-          </ul>
-        </div>
-        <div class="skills-group reveal" data-reveal>
-          <h3 class="skills-group-title">Front-end basics</h3>
-          <ul class="chip-list">
-            <li class="chip">HTML &amp; CSS</li>
-            <li class="chip">A little JavaScript</li>
-          </ul>
-        </div>
-        <div class="skills-group reveal" data-reveal>
-          <h3 class="skills-group-title">Theory</h3>
-          <ul class="chip-list">
-            <li class="chip">User research</li>
-            <li class="chip">Wireframing</li>
-            <li class="chip">Design systems</li>
-            <li class="chip">Accessibility basics</li>
-            <li class="chip">User testing / prototyping</li>
-          </ul>
+        <div class="orbits-legend" role="group" aria-label="Bring a group forward">
+          <button type="button" aria-pressed="false" data-group="design" style="--c: var(--coral)">Design <span>6</span></button>
+          <button type="button" aria-pressed="false" data-group="motion" style="--c: var(--sun)">Prototyping &amp; motion <span>3</span></button>
+          <button type="button" aria-pressed="false" data-group="frontend" style="--c: var(--mint)">Front-end basics <span>2</span></button>
+          <button type="button" aria-pressed="false" data-group="theory" style="--c: var(--cobalt)">Theory <span>5</span></button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- TESTIMONIAL -->
-  <section class="testimonial" id="testimonial">
-    <div class="section-inner testimonial-inner">
-      <p class="eyebrow reveal" data-reveal>Kind words</p>
-      <blockquote class="testimonial-quote reveal" data-reveal>
-        “Jack is the kind of person who brings a good <em>energy</em> to every project. He’s thoughtful, easy to work with, and always willing to help make an idea better.”
-      </blockquote>
-      <p class="testimonial-attribution reveal" data-reveal>
-        Rens Koster <span class="attribution-role">— Ex-colleague, Brandium</span>
-      </p>
+  <!-- TESTIMONIAL: an incoming transmission -->
+  <section class="testimonial" id="testimonial" aria-labelledby="testimonial-title">
+    <div class="section-inner">
+      <p class="eyebrow" id="testimonial-title" data-reveal>Kind words</p>
+      <figure class="transmission">
+        <p class="transmission-status" aria-hidden="true" data-reveal><i></i>Incoming transmission <span>&middot; Brandium, Amsterdam</span></p>
+        <blockquote class="testimonial-quote">
+          <p>“Jack is the kind of person who brings a good <em>energy</em> to every project. He’s thoughtful, easy to work with, and always willing to help make an idea better.”</p>
+        </blockquote>
+        <figcaption class="testimonial-attribution" data-reveal>
+          <span class="wave" aria-hidden="true"></span>
+          <span class="attribution-name"><strong>Rens Koster</strong><span>Ex-colleague, Brandium</span></span>
+        </figcaption>
+      </figure>
     </div>
   </section>
 
-  <!-- CONTACT -->
-  <section class="contact" id="contact">
+  <!-- CONTACT: the letters are heavy near your pointer (gravity) -->
+  <section class="contact" id="contact" aria-labelledby="contact-title">
     <div class="section-inner contact-inner">
-      <p class="eyebrow eyebrow-light reveal" data-reveal>Let's talk</p>
-      <h2 class="section-title section-title-light contact-title reveal" data-reveal>
-        Got an internship, a project,
-        <span class="underline-wrap">or just want to say hi?
-        </span>
+      <p class="eyebrow" data-reveal>Let's talk</p>
+      <h2 class="contact-title" id="contact-title" data-gravity>
+        <span class="contact-line">Got an internship, a project,</span>
+        <span class="contact-line grad">or just want to say hi?</span>
       </h2>
-      <p class="contact-sub reveal" data-reveal>
-        I'm currently looking for internship and junior design opportunities for 2027, and I
-        love talking about any project, big or small. So let's talk!
+      <p class="contact-sub" data-reveal>
+        I'm currently looking for internship and junior design opportunities for 2027, and I love talking about any project, big or small. So let's talk!
       </p>
-      <div class="contact-actions reveal" data-reveal>
+      <div class="contact-actions" data-reveal>
         <a class="btn btn-primary btn-large" data-magnetic href="mailto:jack@whitehead.nl">jack@whitehead.nl</a>
         <button class="btn btn-ghost btn-large btn-copy" type="button" data-copy="jack@whitehead.nl" hidden>
           <svg class="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -362,10 +356,10 @@
         </button>
       </div>
       <p class="sr-only" id="copy-status" aria-live="polite"></p>
-      <p class="contact-note reveal" data-reveal>Open to remote &amp; in-person opportunities</p>
-      <div class="contact-social reveal" data-reveal>
+      <p class="contact-note" data-reveal>Open to remote &amp; in-person opportunities</p>
+      <div class="contact-social" data-reveal>
         <p class="contact-social-title">Or find me here</p>
-        <ul class="social-list">
+        <ul class="social-list" aria-label="Elsewhere">
         <li><a class="social" data-brand="linkedin" href="https://www.linkedin.com/in/jack-whitehead-57075723a/" target="_blank" rel="noopener noreferrer" aria-label="Jack Whitehead on LinkedIn (opens in a new tab)">
           <span class="social-icon"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></span>
           <span class="social-label">LinkedIn</span>
@@ -385,15 +379,21 @@
 
 </main>
 
+<!-- FOOTER: a planet rises at the bottom of every page; on the home page the head peeks over its horizon -->
 <footer class="site-footer">
-  <div class="section-inner footer-inner">
-    <p class="footer-copy"><span class="footer-mark" aria-hidden="true">JW<span class="logo-dot">.</span></span>Jack Whitehead © 2026</p>
-    <p class="footer-clock" hidden><span>Amsterdam<span class="sr-only">, local time</span></span><time>--:--</time></p>
-    <a href="#top" class="back-to-top">Back to top <span class="back-to-top-arrow" aria-hidden="true">↑</span></a>
+  <div class="horizon" aria-hidden="true"><div class="horizon-planet"></div></div>
+  <div class="footer-body">
+    <p class="wordmark" aria-hidden="true">Jack Whitehead</p>
+    <div class="footer-inner">
+      <p class="footer-copy">© 2026 Jack Whitehead</p>
+      <p class="footer-clock" hidden><span>Amsterdam<span class="sr-only">, local time</span></span><time>--:--</time></p>
+      <a href="#top" class="back-to-top">Back to top <span class="back-to-top-arrow" aria-hidden="true">↑</span></a>
+    </div>
   </div>
 </footer>
 
-<script src="js/main.js?v=11"></script>
-<script type="module" src="js/scene3d.js?v=33" onerror="window.__bootFail && window.__bootFail()"></script>
+<script src="js/main.js?v=12"></script>
+<script src="js/home.js?v=1"></script>
+<script type="module" src="js/scene3d.js?v=34" onerror="window.__bootFail && window.__bootFail()"></script>
 </body>
 </html>

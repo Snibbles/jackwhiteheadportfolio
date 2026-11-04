@@ -25,9 +25,9 @@
 <link rel="apple-touch-icon" href="../apple-touch-icon.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=16">
-<link rel="stylesheet" href="../css/v2.css?v=18">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css?v=1">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
@@ -35,7 +35,7 @@
 } }
 </script>
 </head>
-<body class="page-sub">
+<body>
 
 <div id="scene3d" class="scene3d" aria-hidden="true"></div>
 
@@ -43,9 +43,7 @@
 
 <header class="site-header scrolled" id="site-header">
   <div class="header-inner">
-    <a class="logo" href="../index.html">
-      JW<span class="logo-dot">.</span>
-    </a>
+    <a class="logo" href="../index.html" aria-label="Jack Whitehead, home">JW<span class="logo-dot">.</span></a>
     <nav class="nav" id="nav" aria-label="Primary">
       <ul>
         <li><a href="../index.html#about" class="nav-link">About</a></li>
@@ -76,8 +74,8 @@
   <section class="project-hero">
     <div class="section-inner project-hero-inner">
       <a class="back-link" href="../projects.html">← All projects</a>
-      <p class="eyebrow eyebrow-hero">Web · Print · Motion</p>
-      <h1 class="project-title">Buckfiets</h1>
+      <p class="eyebrow">Web · Print · Motion</p>
+      <h1 class="project-title" data-split>Buckfiets</h1>
       <p class="project-summary">Buckfiets is a startup idea: stick an ad on your bakfiets, keep cycling, get paid every month. I designed the landing page prototype, the survey that follows it, and the print that goes with it.</p>
       <dl class="project-meta">
       <div><dt>Role</dt><dd>Brand, web &amp; print design</dd></div>
@@ -85,7 +83,7 @@
       <div><dt>When</dt><dd>2026</dd></div>
       <div><dt>Status</dt><dd>Prototype</dd></div>
       </dl>
-      <div class="project-cover">
+      <div class="project-cover" data-vt="buckfiets">
         <img src="../images/projects/buckfiets/cover.jpg" alt="The Buckfiets landing page on a laptop and a phone, on an orange background" width="1800" height="1179">
       </div>
     </div>
@@ -94,10 +92,10 @@
   <section class="project-block">
     <div class="section-inner">
       <div class="project-block-head">
-        <p class="eyebrow reveal" data-reveal>the landing page</p>
-        <h2 class="section-title reveal" data-reveal>One page, one job.</h2>
-        <p class="project-text reveal" data-reveal>The page explains the idea in three steps and asks bakfiets owners for three minutes of their time through a short survey. I kept it friendly and Dutch, with a small cast of characters and a few details that reward a closer look.</p>
-        <ul class="project-points reveal" data-reveal>
+        <p class="eyebrow" data-reveal>the landing page</p>
+        <h2 class="section-title" data-split>One page, one job.</h2>
+        <p class="project-text" data-reveal>The page explains the idea in three steps and asks bakfiets owners for three minutes of their time through a short survey. I kept it friendly and Dutch, with a small cast of characters and a few details that reward a closer look.</p>
+        <ul class="project-points" data-reveal>
           <li>The mascot&#x27;s eyes follow your cursor.</li>
           <li>The sun and clouds drift with a gentle parallax.</li>
           <li>Hover the empty parking spot and a bakfiets drives in.</li>
@@ -113,7 +111,7 @@
             <figcaption>The whole landing page in a scrollable window. Scroll inside the frame.</figcaption>
           </figure>
         <div class="shot-pair">
-          <figure class="shot " data-reveal>
+          <figure class="shot" data-reveal>
             <div class="shot-media"><img src="../images/projects/buckfiets/landing-mobile.jpg" alt="Three phone screenshots of the Buckfiets landing page" width="1800" height="1179" loading="lazy"></div>
             <figcaption>On the phone, where most bakfiets owners will see it first.</figcaption>
           </figure>
@@ -125,24 +123,24 @@
           </figure>
         </div>
       </div>
-      <p class="project-note reveal" data-reveal>Buckfiets is still in development, so the page above is a prototype.</p>
+      <p class="project-note" data-reveal>Buckfiets is still in development, so the page above is a prototype.</p>
     </div>
   </section>
 
   <section class="project-block project-block-alt">
     <div class="section-inner">
       <div class="project-block-head">
-        <p class="eyebrow reveal" data-reveal>print</p>
-        <h2 class="section-title reveal" data-reveal>Same world, on the street.</h2>
-        <p class="project-text reveal" data-reveal>The characters and colours carry over to flyers and saddle covers, so a rider who scans a QR code on the street lands in the same world as the website.</p>
+        <p class="eyebrow" data-reveal>print</p>
+        <h2 class="section-title" data-split>Same world, on the street.</h2>
+        <p class="project-text" data-reveal>The characters and colours carry over to flyers and saddle covers, so a rider who scans a QR code on the street lands in the same world as the website.</p>
       </div>
       <div class="shot-stack">
         <div class="shot-pair">
-          <figure class="shot " data-reveal>
+          <figure class="shot" data-reveal>
             <div class="shot-media"><img src="../images/projects/buckfiets/flyers.jpg" alt="Three Buckfiets flyers in yellow, blue and red" width="1800" height="1179" loading="lazy"></div>
             <figcaption>Flyers: one colourway per message.</figcaption>
           </figure>
-          <figure class="shot " data-reveal>
+          <figure class="shot" data-reveal>
             <div class="shot-media"><img src="../images/projects/buckfiets/saddle-covers.jpg" alt="Three Buckfiets saddle covers in yellow, blue and red" width="1800" height="1179" loading="lazy"></div>
             <figcaption>Saddle covers: a coin pattern with a sticker panel and QR code.</figcaption>
           </figure>
@@ -154,8 +152,8 @@
   <section class="next-project">
     <div class="section-inner">
       <div>
-        <p class="eyebrow eyebrow-light">next up</p>
-        <a class="next-link" href="coravin.html"><span class="next-thumb" aria-hidden="true"><img src="../images/projects/coravin/cover-card.jpg" alt="" width="1200" height="786" loading="lazy" decoding="async"></span><span>Coravin</span><span aria-hidden="true">→</span></a>
+        <p class="eyebrow">Next up</p>
+        <a class="next-link" href="coravin.html"><span class="next-thumb" aria-hidden="true" data-vt="coravin"><img src="../images/projects/coravin/cover-card.jpg" alt="" width="1200" height="786" loading="lazy" decoding="async"></span><span>Coravin</span><span aria-hidden="true">→</span></a>
       </div>
       <a class="btn btn-ghost" href="../projects.html">All projects</a>
     </div>
@@ -164,14 +162,18 @@
 </main>
 
 <footer class="site-footer">
-  <div class="section-inner footer-inner">
-    <p class="footer-copy"><span class="footer-mark" aria-hidden="true">JW<span class="logo-dot">.</span></span>Jack Whitehead © 2026</p>
-    <p class="footer-clock" hidden><span>Amsterdam<span class="sr-only">, local time</span></span><time>--:--</time></p>
-    <a href="#top" class="back-to-top">Back to top <span class="back-to-top-arrow" aria-hidden="true">↑</span></a>
+  <div class="horizon" aria-hidden="true"><div class="horizon-planet"></div></div>
+  <div class="footer-body">
+    <p class="wordmark" aria-hidden="true">Jack Whitehead</p>
+    <div class="footer-inner">
+      <p class="footer-copy">© 2026 Jack Whitehead</p>
+      <p class="footer-clock" hidden><span>Amsterdam<span class="sr-only">, local time</span></span><time>--:--</time></p>
+      <a href="#top" class="back-to-top">Back to top <span class="back-to-top-arrow" aria-hidden="true">↑</span></a>
+    </div>
   </div>
 </footer>
 
-<script src="../js/main.js?v=11"></script>
-<script type="module" src="../js/scene3d.js?v=33"></script>
+<script src="../js/main.js?v=12"></script>
+<script type="module" src="../js/scene3d.js?v=34"></script>
 </body>
 </html>

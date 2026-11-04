@@ -25,9 +25,9 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=16">
-<link rel="stylesheet" href="css/v2.css?v=18">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css?v=1">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
@@ -35,7 +35,7 @@
 } }
 </script>
 </head>
-<body class="page-sub">
+<body>
 
 <div id="scene3d" class="scene3d" aria-hidden="true"></div>
 
@@ -43,9 +43,7 @@
 
 <header class="site-header scrolled" id="site-header">
   <div class="header-inner">
-    <a class="logo" href="index.html">
-      JW<span class="logo-dot">.</span>
-    </a>
+    <a class="logo" href="index.html" aria-label="Jack Whitehead, home">JW<span class="logo-dot">.</span></a>
     <nav class="nav" id="nav" aria-label="Primary">
       <ul>
         <li><a href="index.html#about" class="nav-link">About</a></li>
@@ -73,168 +71,135 @@
 </div>
 
 <main id="main">
-  <section class="work projects-index" id="work">
-    <div class="section-inner">
-      <a class="back-link back-link-dark" href="index.html">← Home</a>
-      <p class="eyebrow reveal" data-reveal>all work</p>
-      <h1 class="section-title reveal" data-reveal>Everything I've made</h1>
-      <p class="section-sub reveal" data-reveal>
-        The newest work comes first.
-        Tap a card for the full story.
-      </p>
-
-      <div class="work-grid">
-
-        <a class="work-card work-card-link reveal" data-reveal href="projects/buckfiets.html" style="--tilt:-2deg">
-          <span class="work-card-visual work-visual-1">
-            <img
-              src="images/projects/buckfiets/cover-card.jpg"
-              alt="The Buckfiets landing page on a laptop and a phone, on an orange background"
-              class="work-card-visual-img work-card-visual-img-fit"
-              width="1200" height="786"
-              loading="lazy"
-            >
-          </span>
-          <span class="work-card-body">
-            <span class="work-card-tag">Web · Print · Motion</span>
-            <span class="work-card-title">Buckfiets</span>
-            <span class="work-card-desc">A landing page, flyers and saddle covers for a startup that pays cargo-bike owners to carry ads</span>
-          </span>
-        </a>
-
-        <a class="work-card work-card-link reveal" data-reveal href="projects/coravin.html" style="--tilt:1.5deg">
-          <span class="work-card-visual work-visual-2">
-            <img
-              src="images/projects/coravin/cover-card.jpg"
-              alt="Three vertical Coravin video frames: a wine pour with a title, champagne being opened, and a gift being wrapped"
-              class="work-card-visual-img work-card-visual-img-fit"
-              width="1200" height="786"
-              loading="lazy"
-            >
-          </span>
-          <span class="work-card-body">
-            <span class="work-card-tag">Video · Edit &amp; sound</span>
-            <span class="work-card-title">Coravin</span>
-            <span class="work-card-desc">Vertical social videos for Coravin, edited from a brief by Butterfly Studio</span>
-          </span>
-        </a>
-
-        <a class="work-card work-card-link reveal" data-reveal href="projects/projects-amsterdam.html" style="--tilt:-1.5deg">
-          <span class="work-card-visual work-visual-3">
-            <img
-              src="images/projects/projects-amsterdam/cover-card.jpg"
-              alt="Two browser windows showing the Projects Amsterdam kitchen and bathroom pages"
-              class="work-card-visual-img work-card-visual-img-fit"
-              width="1200" height="786"
-              loading="lazy"
-            >
-          </span>
-          <span class="work-card-body">
-            <span class="work-card-tag">Web design</span>
-            <span class="work-card-title">Projects Amsterdam</span>
-            <span class="work-card-desc">Website pages for an Amsterdam renovation and interiors firm, built around their photography</span>
-          </span>
-        </a>
-
-        <a class="work-card work-card-link reveal" data-reveal href="projects/seo.html" style="--tilt:2deg">
-          <span class="work-card-visual work-visual-4">
-            <img
-              src="images/projects/seo/cover-card.jpg"
-              alt="A Google Sheets dashboard and a scored list of link prospects"
-              class="work-card-visual-img work-card-visual-img-fit"
-              width="1200" height="786"
-              loading="lazy"
-            >
-          </span>
-          <span class="work-card-body">
-            <span class="work-card-tag">SEO · Automation</span>
-            <span class="work-card-title">SEO link-building tool</span>
-            <span class="work-card-desc">A Google Sheets tool that finds, scores and tracks link-building prospects for clients</span>
-          </span>
-        </a>
-
-        <a class="work-card work-card-link reveal" data-reveal href="projects/axventures.html" style="--tilt:-2deg">
-          <span class="work-card-visual work-visual-5">
-            <img
-              src="images/projects/axventures/cover-card.jpg"
-              alt="Three frames of an animated Axventures page: a pink title block, the dark header and the intro text"
-              class="work-card-visual-img work-card-visual-img-fit"
-              width="1200" height="786"
-              loading="lazy"
-            >
-          </span>
-          <span class="work-card-body">
-            <span class="work-card-tag">UX/UI · Website</span>
-            <span class="work-card-title">Axventures</span>
-            <span class="work-card-desc">A modern mental health coaching site brought to life with expressive motion</span>
-          </span>
-        </a>
-
-        <a class="work-card work-card-link reveal" data-reveal href="projects/bolscout.html" style="--tilt:1.5deg">
-          <span class="work-card-visual work-visual-6">
-            <img
-              src="images/projects/bolscout/cover-card.jpg"
-              alt="The Bolscout dashboard in two browser windows: six key numbers, a line chart and a bar chart"
-              class="work-card-visual-img work-card-visual-img-fit"
-              width="1200" height="786"
-              loading="lazy"
-            >
-          </span>
-          <span class="work-card-body">
-            <span class="work-card-tag">Product Design · UI / Data Viz</span>
-            <span class="work-card-title">Bolscout</span>
-            <span class="work-card-desc">A financial management interface designed to make complex information clear</span>
-          </span>
-        </a>
-
-        <a class="work-card work-card-link reveal" data-reveal href="projects/qualiko.html" style="--tilt:2deg">
-          <span class="work-card-visual work-visual-7">
-            <img
-              src="images/projects/qualiko/cover-card.jpg"
-              alt="Two spreads from the Qualiko recipe book: a Wok Crispers recipe and the cover"
-              class="work-card-visual-img work-card-visual-img-fit"
-              width="1200" height="786"
-              loading="lazy"
-            >
-          </span>
-          <span class="work-card-body">
-            <span class="work-card-tag">Branding · Digital Design</span>
-            <span class="work-card-title">Qualiko Recipe Book</span>
-            <span class="work-card-desc">An extensive recipe book featuring 50 recipes, designed for a leading chicken manufacturer</span>
-          </span>
-        </a>
-
-        <a class="work-card work-card-link reveal" data-reveal href="projects/walkwise.html" style="--tilt:-1.5deg">
-          <span class="work-card-visual work-visual-8">
-            <img
-              src="images/projects/walkwise/cover-card.jpg"
-              alt="Four Walkwise app screens on a dark background: home, goals, profile and routes"
-              class="work-card-visual-img work-card-visual-img-fit"
-              width="1200" height="786"
-              loading="lazy"
-            >
-          </span>
-          <span class="work-card-body">
-            <span class="work-card-tag">Interaction · Prototype</span>
-            <span class="work-card-title">Walkwise</span>
-            <span class="work-card-desc">Designed a multi-device app connecting walking and mental wellbeing through playful branding and daily goals</span>
-          </span>
-        </a>
-
-      </div>
+  <section class="projects-page" aria-labelledby="page-title">
+    <div class="section-inner page-head">
+      <a class="back-link" href="index.html">← Home</a>
+      <p class="eyebrow" data-reveal>All work · 08 projects</p>
+      <h1 class="page-title" id="page-title" data-split>Everything I've made</h1>
+      <p class="section-sub" data-reveal>The newest work comes first. Tap a project for the full story.</p>
+      <ol class="gallery">
+        <li style="--tint: #F0802F" data-reveal>
+          <article class="tile" data-cursor="View">
+            <div class="tile-media" data-parallax data-vt="buckfiets">
+              <img src="images/projects/buckfiets/cover-card.jpg" alt="The Buckfiets landing page on a laptop and a phone, on an orange background" width="1200" height="786" loading="lazy" decoding="async">
+            </div>
+            <div class="tile-body">
+              <span class="tile-index" aria-hidden="true">01</span>
+              <h2 class="tile-title"><a href="projects/buckfiets.html">Buckfiets</a></h2>
+              <p class="tile-tags">Web · Print · Motion</p>
+              <p class="tile-desc">A landing page, flyers and saddle covers for a startup that pays cargo-bike owners to carry ads.</p>
+            </div>
+          </article>
+        </li>
+        <li style="--tint: #B23A48" data-reveal>
+          <article class="tile" data-cursor="View">
+            <div class="tile-media" data-parallax data-vt="coravin">
+              <img src="images/projects/coravin/cover-card.jpg" alt="Three vertical Coravin video frames: a wine pour with a title, champagne being opened, and a gift being wrapped" width="1200" height="786" loading="lazy" decoding="async">
+            </div>
+            <div class="tile-body">
+              <span class="tile-index" aria-hidden="true">02</span>
+              <h2 class="tile-title"><a href="projects/coravin.html">Coravin</a></h2>
+              <p class="tile-tags">Video · Edit &amp; sound</p>
+              <p class="tile-desc">Vertical social videos for Coravin, edited from a brief by Butterfly Studio.</p>
+            </div>
+          </article>
+        </li>
+        <li style="--tint: #C9A45C" data-reveal>
+          <article class="tile" data-cursor="View">
+            <div class="tile-media" data-parallax data-vt="projects-amsterdam">
+              <img src="images/projects/projects-amsterdam/cover-card.jpg" alt="Two browser windows showing the Projects Amsterdam kitchen and bathroom pages" width="1200" height="786" loading="lazy" decoding="async">
+            </div>
+            <div class="tile-body">
+              <span class="tile-index" aria-hidden="true">03</span>
+              <h2 class="tile-title"><a href="projects/projects-amsterdam.html">Projects Amsterdam</a></h2>
+              <p class="tile-tags">Web design</p>
+              <p class="tile-desc">Website pages for an Amsterdam renovation and interiors firm, built around their photography.</p>
+            </div>
+          </article>
+        </li>
+        <li style="--tint: #3D63F5" data-reveal>
+          <article class="tile" data-cursor="View">
+            <div class="tile-media" data-parallax data-vt="seo">
+              <img src="images/projects/seo/cover-card.jpg" alt="A Google Sheets dashboard and a scored list of link prospects" width="1200" height="786" loading="lazy" decoding="async">
+            </div>
+            <div class="tile-body">
+              <span class="tile-index" aria-hidden="true">04</span>
+              <h2 class="tile-title"><a href="projects/seo.html">SEO link-building tool</a></h2>
+              <p class="tile-tags">SEO · Automation</p>
+              <p class="tile-desc">A Google Sheets tool that finds, scores and tracks link-building prospects for clients.</p>
+            </div>
+          </article>
+        </li>
+        <li style="--tint: #E0457B" data-reveal>
+          <article class="tile" data-cursor="View">
+            <div class="tile-media" data-parallax data-vt="axventures">
+              <img src="images/projects/axventures/cover-card.jpg" alt="Three frames of an animated Axventures page: a pink title block, the dark header and the intro text" width="1200" height="786" loading="lazy" decoding="async">
+            </div>
+            <div class="tile-body">
+              <span class="tile-index" aria-hidden="true">05</span>
+              <h2 class="tile-title"><a href="projects/axventures.html">Axventures</a></h2>
+              <p class="tile-tags">UX/UI · Website</p>
+              <p class="tile-desc">A modern mental health coaching site brought to life with expressive motion.</p>
+            </div>
+          </article>
+        </li>
+        <li style="--tint: #4F7CFF" data-reveal>
+          <article class="tile" data-cursor="View">
+            <div class="tile-media" data-parallax data-vt="bolscout">
+              <img src="images/projects/bolscout/cover-card.jpg" alt="The Bolscout dashboard in two browser windows: six key numbers, a line chart and a bar chart" width="1200" height="786" loading="lazy" decoding="async">
+            </div>
+            <div class="tile-body">
+              <span class="tile-index" aria-hidden="true">06</span>
+              <h2 class="tile-title"><a href="projects/bolscout.html">Bolscout</a></h2>
+              <p class="tile-tags">Product design · UI / Data viz</p>
+              <p class="tile-desc">A financial management interface designed to make complex information clear.</p>
+            </div>
+          </article>
+        </li>
+        <li style="--tint: #F2B620" data-reveal>
+          <article class="tile" data-cursor="View">
+            <div class="tile-media" data-parallax data-vt="qualiko">
+              <img src="images/projects/qualiko/cover-card.jpg" alt="Two spreads from the Qualiko recipe book: a Wok Crispers recipe and the cover" width="1200" height="786" loading="lazy" decoding="async">
+            </div>
+            <div class="tile-body">
+              <span class="tile-index" aria-hidden="true">07</span>
+              <h2 class="tile-title"><a href="projects/qualiko.html">Qualiko Recipe Book</a></h2>
+              <p class="tile-tags">Branding · Digital design</p>
+              <p class="tile-desc">An extensive recipe book featuring 50 recipes, designed for a leading chicken manufacturer.</p>
+            </div>
+          </article>
+        </li>
+        <li style="--tint: #3FBF7F" data-reveal>
+          <article class="tile" data-cursor="View">
+            <div class="tile-media" data-parallax data-vt="walkwise">
+              <img src="images/projects/walkwise/cover-card.jpg" alt="Four Walkwise app screens on a dark background: home, goals, profile and routes" width="1200" height="786" loading="lazy" decoding="async">
+            </div>
+            <div class="tile-body">
+              <span class="tile-index" aria-hidden="true">08</span>
+              <h2 class="tile-title"><a href="projects/walkwise.html">Walkwise</a></h2>
+              <p class="tile-tags">Interaction · Prototype</p>
+              <p class="tile-desc">A multi-device app connecting walking and mental wellbeing through playful branding and daily goals.</p>
+            </div>
+          </article>
+        </li>
+      </ol>
     </div>
   </section>
 </main>
 
 <footer class="site-footer">
-  <div class="section-inner footer-inner">
-    <p class="footer-copy"><span class="footer-mark" aria-hidden="true">JW<span class="logo-dot">.</span></span>Jack Whitehead © 2026</p>
-    <p class="footer-clock" hidden><span>Amsterdam<span class="sr-only">, local time</span></span><time>--:--</time></p>
-    <a href="#top" class="back-to-top">Back to top <span class="back-to-top-arrow" aria-hidden="true">↑</span></a>
+  <div class="horizon" aria-hidden="true"><div class="horizon-planet"></div></div>
+  <div class="footer-body">
+    <p class="wordmark" aria-hidden="true">Jack Whitehead</p>
+    <div class="footer-inner">
+      <p class="footer-copy">© 2026 Jack Whitehead</p>
+      <p class="footer-clock" hidden><span>Amsterdam<span class="sr-only">, local time</span></span><time>--:--</time></p>
+      <a href="#top" class="back-to-top">Back to top <span class="back-to-top-arrow" aria-hidden="true">↑</span></a>
+    </div>
   </div>
 </footer>
 
-<script src="js/main.js?v=11"></script>
-<script type="module" src="js/scene3d.js?v=33"></script>
+<script src="js/main.js?v=12"></script>
+<script type="module" src="js/scene3d.js?v=34"></script>
 </body>
 </html>

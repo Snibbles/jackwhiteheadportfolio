@@ -687,6 +687,50 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
       }`
     })));
     yawG.add(gltf.scene); fitFlameToHead(); headReady = true;
+    buildFinale(gltf.scene);
+  }
+
+  /* ---------- the finale: at the end of the page the head peeks over the horizon of the planet in the footer ----------
+     The planet is part of the page (HTML), drawn in front of this canvas, so it hides the neck by itself. */
+  const finaleG = new THREE.Group(), finaleLook = new THREE.Group();
+  finaleG.add(finaleLook); finaleG.visible = false; scene.add(finaleG);
+  const finale = { ready: false, placed: false, top: 0, h: 1, size: 0.4, look: 0, lookX: 0 };
+  function buildFinale(model) {
+    if (!document.querySelector('.site-footer .horizon')) return;
+    const copy = model.clone(true);                          // shares geometry and materials with the hero head
+    const box = new THREE.Box3().setFromObject(copy), size = new THREE.Vector3(); box.getSize(size);
+    finale.size = size.y; finale.base = box.min.y;
+    finaleLook.add(copy); finale.ready = true;
+    // a warm sunrise behind it, so the dark hair reads against the dark sky
+    const glow = new THREE.Mesh(GEO.billboard, haloMat(0xFF8A66, 0.5));
+    glow.scale.setScalar(size.y * 1.1); glow.position.set(0, box.min.y + size.y * 0.5, -size.y * 0.6); glow.renderOrder = -1;
+    finaleG.add(glow);
+    if (state.vh > 1) placeAmbient();
+  }
+  function placeFinale(maxScroll) {
+    const footer = document.querySelector('.site-footer');
+    if (!finale.ready || !footer) return;
+    const r = footer.getBoundingClientRect(), sky = parseFloat(getComputedStyle(footer).paddingTop) || 200;
+    finale.top = r.top + window.scrollY; finale.h = Math.max(1, r.height);
+    poseCamera(maxScroll);                                    // placed for the very bottom of the page, where the planet has fully risen
+    const horizonY = finale.top + sky - maxScroll;
+    const pt = worldAtNdc(0, 1 - 2 * horizonY / state.vh, 0);
+    const k = (sky * 0.92 * state.PXW) / finale.size;         // the head fills most of the sky above the horizon
+    finaleG.position.copy(pt); finaleG.scale.setScalar(k);
+    finale.anchorY = pt.y; finale.lift = finale.size * k; finale.placed = true;
+  }
+  function updateFinale(t) {
+    if (!finale.placed) return;
+    const sy = window.scrollY, rise = Math.min(Math.max((state.vh - (finale.top - sy)) / finale.h, 0), 1);
+    finaleG.visible = rise > 0.02;
+    if (!finaleG.visible) return;
+    const e = 1 - Math.pow(1 - rise, 3);
+    // from hidden behind the planet to peeking over it (the neck stays below the horizon)
+    finaleG.position.y = finale.anchorY - finale.lift * (1.15 - 0.95 * e) - finale.base * finaleG.scale.y + Math.sin(t * 1.3) * finale.lift * 0.015;
+    const idle = reduce || performance.now() - mouse.last > 2500;
+    const yaw = idle ? Math.sin(t * 0.5) * 0.35 : mouse.x * 0.55, pitch = idle ? -0.3 : -0.32 + mouse.y * 0.18;   // the camera looks down a little, so 'at you' is slightly up
+    finale.look += (yaw - finale.look) * 0.06; finale.lookX += (pitch - finale.lookX) * 0.06;
+    finaleLook.rotation.set(finale.lookX, finale.look, Math.sin(t * 0.7) * 0.03);
   }
   const setMeter = p => { if (meterBar) meterBar.style.transform = `scaleX(${p})`; if (meterTxt) meterTxt.textContent = `Preparing launch ${Math.round(p * 100)}%`; };
   if (hero) {
@@ -785,6 +829,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
       const comp = (state.D - d.z) / state.D, k = state.mobile ? (d.s > 0.3 ? 0.55 : 0.7) : 1.0;
       o.scale.setScalar(d.s * comp * k);
     });
+    if (hero) placeFinale(maxScroll);
     poseCamera(window.scrollY);
     bakeNebula(); updateStars();
   }
@@ -935,9 +980,12 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
         if (!o.visible) return; const d = o.userData;
         if (d.spinT) { if (d.kind === 'rock' || d.kind === 'crystal') o.rotation.set(t * d.aspin[0], t * d.aspin[1], t * d.aspin[2]); else d.spinT.rotation.y = t * (0.08 + (d.i % 3) * 0.03); }
         if (d.moonP) d.moonP.rotation.y = t * 0.35;
-        o.position.set(d.base.x + mouse.x * 0.03 * (1 - d.z), d.base.y + Math.sin(t * 0.8 + d.phase) * 0.03 - mouse.y * 0.02, d.base.z);
+        // they drift on their own (no pointer): a slow figure-of-eight, different for each object
+        o.position.set(d.base.x + Math.sin(t * 0.13 + d.phase) * 0.035, d.base.y + Math.sin(t * 0.21 + d.phase * 1.3) * 0.03, d.base.z);
+        if (!d.spinT || d.kind !== 'rock') o.rotation.z = Math.sin(t * 0.09 + d.phase) * 0.06;
       });
     }
+    updateFinale(reduce ? 0 : t);
     // the things around the head pop in around the landing
     const pop = headIn > 0 ? sstep(0, 1, (performance.now() - headIn) / 700) : sstep(T_L - 0.2, T_L + 0.9, launched ? vt : 0);
     heroObjs.forEach(o => { o.visible = pop > 0.01 && !(lite && o.userData.kind === 'sparkle'); o.scale.setScalar(o.userData.s * (0.2 + 0.8 * pop)); });

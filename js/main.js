@@ -1,6 +1,8 @@
 /* ============================================================
-   Page behaviour, in small independent parts. Each part is wrapped, so if one fails the rest still runs,
-   and without JavaScript the page is complete and readable (see the scripting media queries in v2.css).
+   Site-wide behaviour, on every page.
+   Small independent parts: if one fails the rest still runs, and without JavaScript every page is
+   complete and readable (see "Reduced motion & no-script" in css/site.css).
+   Home-page sections live in js/home.js, the 3D layer in js/scene3d.js.
    ============================================================ */
 (() => {
   "use strict";
@@ -12,56 +14,90 @@
   const onScreen = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < innerHeight; };
   const run = (name, fn) => { try { fn(); } catch (e) { console.warn(`[${name}]`, e); } };
 
-  /* scroll-linked effects share one rAF; positions are measured once (and again on resize), never on every frame */
-  const fx = [], measures = [];
+  /* Scroll-linked effects share one animation frame. Positions are measured on load and resize, never per frame. */
+  const fx = [], measures = [], revealHooks = [];
   let queued = false;
   const frame = () => { queued = false; const y = scrollY, vh = innerHeight; fx.forEach((f) => f(y, vh)); };
   const queue = () => { if (!queued) { queued = true; requestAnimationFrame(frame); } };
   const measure = () => { measures.forEach((m) => m()); queue(); };
 
-  /* things that should happen when an element is revealed (odometers...) */
-  const revealHooks = [];
+  /* Run a callback once, the first time an element scrolls into view. */
+  const onceVisible = (() => {
+    const callbacks = new Map();
+    const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      io.unobserve(e.target);
+      (callbacks.get(e.target) || []).forEach((cb) => cb(e.target));
+      callbacks.delete(e.target);
+    }), { rootMargin: "0px 0px -40px 0px" });
+    return (el, cb) => { callbacks.set(el, (callbacks.get(el) || []).concat(cb)); io.observe(el); };
+  })();
 
-  /* ----------------------------------------------------------
-     Reveal on scroll
-  ---------------------------------------------------------- */
-  run("reveal", () => {
-    const els = document.querySelectorAll("[data-reveal]");
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const el = entry.target;
-        el.classList.add("is-visible");
-        revealHooks.forEach((h) => h(el));
-        io.unobserve(el);
-      });
-    }, { threshold: 0, rootMargin: "0px 0px -40px 0px" });
-
-    els.forEach((el) => {
-      const group = el.closest(".about-grid, .work-grid, .skills-grid, .stat-grid, .shot-pair, .project-duo");
-      let delay = 0;
-      if (group) delay = Math.min(Array.from(group.querySelectorAll("[data-reveal]")).indexOf(el), 5) * 0.08;
-      el.style.setProperty("--reveal-delay", reduce ? "0s" : `${delay}s`);
-      // the hero is the first screen by definition: it never waits for a scroll (on short screens its buttons sit right at the fold)
-      if (el.closest(".hero")) el.classList.add("is-visible");
-      else io.observe(el);
-    });
-
-    // chips pop in one after another inside their group
-    document.querySelectorAll(".skills-group").forEach((g) => g.querySelectorAll(".chip").forEach((c, i) => c.style.setProperty("--ci", i)));
+  /* Shared with js/home.js */
+  const JW = (window.JW = {
+    reduce, finePointer, clamp, onScreen, run, onceVisible, measure,
+    onScroll: (f) => fx.push(f), onMeasure: (f) => measures.push(f), onReveal: (f) => revealHooks.push(f),
+    lenis: null,
   });
 
   /* ----------------------------------------------------------
-     Header: glass bar once you leave the hero, and a reading-progress hairline
+     Headings rise word by word out of a mask. Screen readers get the plain sentence.
+  ---------------------------------------------------------- */
+  run("split", () => {
+    document.querySelectorAll("[data-split]").forEach((h) => {
+      const sentence = h.textContent.replace(/\s+/g, " ").trim();
+      const visual = document.createElement("span");
+      visual.setAttribute("aria-hidden", "true");
+      let i = 0;
+      const word = (content) => {
+        const outer = document.createElement("span"), inner = document.createElement("span");
+        outer.className = "sw";
+        inner.style.setProperty("--wi", i++);
+        inner.append(content);
+        outer.append(inner);
+        return outer;
+      };
+      h.childNodes.forEach((n) => {
+        if (n.nodeType === 3) {
+          n.nodeValue.split(/(\s+)/).forEach((part) => {
+            if (part && /^\s+$/.test(part)) visual.append(" ");
+            else if (part) visual.append(word(part));
+          });
+        } else if (n.nodeName === "BR") visual.append(document.createElement("br"));
+        else if (n.nodeType === 1) visual.append(word(n.cloneNode(true)));   // an inline phrase (like the gradient one) rises as one piece
+      });
+      const sr = document.createElement("span");
+      sr.className = "sr-only";
+      sr.textContent = sentence;
+      h.replaceChildren(sr, visual);
+      if (reduce) h.classList.add("split-in");
+      else onceVisible(h, () => h.classList.add("split-in"));
+    });
+  });
+
+  /* ----------------------------------------------------------
+     Reveal on scroll (staggered inside groups). The hero never waits for a scroll.
+  ---------------------------------------------------------- */
+  run("reveal", () => {
+    document.querySelectorAll("[data-reveal]").forEach((el) => {
+      const group = el.parentElement && el.parentElement.closest(".about-grid, .stats, .gallery, .shot-pair, .project-duo");
+      const index = group ? Array.from(group.querySelectorAll("[data-reveal]")).indexOf(el) : 0;
+      el.style.setProperty("--reveal-delay", reduce ? "0s" : `${Math.min(index, 5) * 0.09}s`);
+      const show = () => { el.classList.add("is-visible"); revealHooks.forEach((h) => h(el)); };
+      if (el.closest(".hero")) show();
+      else onceVisible(el, show);
+    });
+  });
+
+  /* ----------------------------------------------------------
+     Header: a glass bar once you leave the hero, and a reading-progress hairline
   ---------------------------------------------------------- */
   run("header", () => {
     const header = document.getElementById("site-header");
     const hero = document.querySelector(".hero");
     if (!header) return;
-    if (hero) {
-      new IntersectionObserver(([e]) => header.classList.toggle("scrolled", !e.isIntersecting || e.intersectionRatio < 0.6), { threshold: [0, 0.6] }).observe(hero);
-    } else header.classList.add("scrolled");
-
+    if (hero) new IntersectionObserver(([e]) => header.classList.toggle("scrolled", !e.isIntersecting || e.intersectionRatio < 0.6), { threshold: [0, 0.6] }).observe(hero);
+    else header.classList.add("scrolled");
     const bar = document.createElement("span");
     bar.className = "scroll-progress";
     bar.setAttribute("aria-hidden", "true");
@@ -72,7 +108,7 @@
   });
 
   /* ----------------------------------------------------------
-     Nav: one pill glides between the links (hover, focus and the section you're reading)
+     Nav: one pill glides between the links (pointer, focus, and the section you're reading)
   ---------------------------------------------------------- */
   run("nav", () => {
     const nav = document.getElementById("nav");
@@ -94,7 +130,6 @@
       glider.classList.add("visible");
       if (jump) { void glider.offsetWidth; glider.classList.remove("instant"); }
     }
-
     links.forEach((l) => {
       l.addEventListener("pointerenter", () => { pointing = true; place(l); });
       l.addEventListener("focus", () => place(l));
@@ -102,26 +137,22 @@
     nav.addEventListener("pointerleave", () => { pointing = false; place(current); });
     nav.addEventListener("focusout", (e) => { if (!nav.contains(e.relatedTarget)) place(current); });
 
-    // which section is in the middle of the screen (home page only: its links point at #ids)
+    // the home page links point at #ids: follow the section in the middle of the screen
     const byId = new Map();
     links.concat(mobileLinks).forEach((l) => {
       const h = l.getAttribute("href") || "";
       if (h.startsWith("#") && h.length > 1) byId.set(h.slice(1), (byId.get(h.slice(1)) || []).concat(l));
     });
     if (byId.size) {
-      const sections = Array.from(document.querySelectorAll("#main > section[id]"));
-      const spy = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          const match = byId.get(entry.target.id) || [];
-          links.concat(mobileLinks).forEach((l) => l.classList.toggle("active", match.includes(l)));
-          current = match.find((l) => links.includes(l)) || null;
-          if (!pointing) place(current);
-        });
-      }, { rootMargin: "-45% 0px -50% 0px" });
-      sections.forEach((s) => spy.observe(s));
+      const spy = new IntersectionObserver((entries) => entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const match = byId.get(entry.target.id) || [];
+        links.concat(mobileLinks).forEach((l) => l.classList.toggle("active", match.includes(l)));
+        current = match.find((l) => links.includes(l)) || null;
+        if (!pointing) place(current);
+      }), { rootMargin: "-45% 0px -50% 0px" });
+      document.querySelectorAll("#main > section[id]").forEach((s) => spy.observe(s));
     }
-
     const settle = () => place(pointing ? null : current, true);
     addEventListener("resize", settle);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(settle);
@@ -129,7 +160,7 @@
   });
 
   /* ----------------------------------------------------------
-     Mobile menu: hidden means unfocusable, Esc closes, the page behind is inert while it's open
+     Mobile menu: hidden means unfocusable, Esc closes it, the page behind is inert while it's open
   ---------------------------------------------------------- */
   run("menu", () => {
     const toggle = document.getElementById("menu-toggle");
@@ -137,7 +168,6 @@
     if (!toggle || !menu) return;
     const behind = [document.getElementById("main"), document.querySelector(".site-footer"), document.querySelector(".site-header .logo"), document.querySelector(".skip-link")].filter(Boolean);
     menu.inert = true;
-
     function setOpen(open, moveFocus = true) {
       menu.classList.toggle("open", open);
       root.classList.toggle("menu-open", open);
@@ -145,11 +175,11 @@
       behind.forEach((el) => { el.inert = open; });
       toggle.setAttribute("aria-expanded", String(open));
       toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      if (JW.lenis) JW.lenis[open ? "stop" : "start"]();
       if (!moveFocus) return;
       if (open) setTimeout(() => { const first = menu.querySelector("a"); if (first) first.focus({ preventScroll: true }); }, 60);
       else toggle.focus({ preventScroll: true });
     }
-
     toggle.addEventListener("click", () => setOpen(!menu.classList.contains("open")));
     menu.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => setOpen(false, false)));
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && menu.classList.contains("open")) setOpen(false); });
@@ -157,127 +187,150 @@
   });
 
   /* ----------------------------------------------------------
-     Hero: masks come off once the words have risen; the copy drifts back as you scroll away (wide screens)
+     Smooth scrolling (Lenis) for wheel and trackpad. Touch, keyboard and scrollbars stay native.
+     In-page links keep moving focus to where they lead. Off when motion is reduced.
   ---------------------------------------------------------- */
-  run("hero", () => {
-    const hero = document.querySelector(".hero");
-    if (!hero) return;
-    let settled = false;
-    const settle = () => { if (settled) return; settled = true; setTimeout(() => hero.classList.add("hero-settled"), reduce ? 0 : 1700); };
-    if (root.classList.contains("skip-intro") || root.classList.contains("no-3d") || !hero.classList.contains("hero-wait")) settle();
-    else addEventListener("hero:landed", settle, { once: true });
+  run("smooth-scroll", () => {
+    if (reduce) return;
+    import("https://cdn.jsdelivr.net/npm/lenis@1.3.19/dist/lenis.mjs").then(({ default: Lenis }) => {
+      JW.lenis = new Lenis({ lerp: 0.1, autoRaf: true, allowNestedScroll: true, prevent: (node) => !!(node.closest && node.closest(".lightbox, .mobile-menu")) });
+    }).catch(() => {});
 
-    const copy = hero.querySelector(".hero-copy");
-    const wide = matchMedia("(min-width: 760px) and (min-aspect-ratio: 21/20)");
-    if (!copy || reduce) return;
-    fx.push((y, vh) => {
-      if (!wide.matches) { copy.style.opacity = ""; copy.style.transform = ""; return; }
-      const p = clamp((y - vh * 0.06) / (vh * 0.6), 0, 1);
-      copy.style.opacity = p ? (1 - p * 0.92).toFixed(3) : "";
-      copy.style.transform = p ? `translate3d(0, ${(-p * 46).toFixed(1)}px, 0)` : "";
+    document.addEventListener("click", (e) => {
+      const a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a || !JW.lenis || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      const id = decodeURIComponent(a.getAttribute("href").slice(1));
+      const target = id && id !== "top" ? document.getElementById(id) : null;
+      e.preventDefault();
+      if (target) {
+        JW.lenis.scrollTo(target, { offset: -(parseFloat(getComputedStyle(target).scrollMarginTop) || 0) });
+        history.pushState(null, "", `#${id}`);
+        if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+        target.focus({ preventScroll: true });
+      } else {
+        JW.lenis.scrollTo(0);
+        history.pushState(null, "", location.pathname + location.search);
+        const logo = document.querySelector(".site-header .logo");
+        if (logo) logo.focus({ preventScroll: true });
+      }
     });
   });
 
   /* ----------------------------------------------------------
-     Stats: numbers roll into place like an odometer (screen readers get the plain number)
+     A small "View" label follows the pointer over projects (mouse only)
   ---------------------------------------------------------- */
-  run("odometer", () => {
-    const LH = 1.05;
-    document.querySelectorAll(".stat-number").forEach((num) => {
-      const first = num.firstChild;
-      if (!first || first.nodeType !== 3) return;
-      const m = first.nodeValue.match(/^(\s*)(\d+)([\s\S]*)$/);
-      if (!m) return;
-      const digits = m[2];
-      const sr = document.createElement("span");
-      sr.className = "sr-only";
-      sr.textContent = digits;
-      const odo = document.createElement("span");
-      odo.setAttribute("aria-hidden", "true");
-      odo.style.display = "inline-flex";
-      const strips = Array.from(digits).map((d, k) => {
-        const box = document.createElement("span");
-        box.className = "odo";
-        const strip = document.createElement("span");
-        strip.className = "odo-strip";
-        const laps = k === digits.length - 1 ? 1 : 0;          // the last digit spins a full turn first
-        const target = laps * 10 + Number(d);
-        for (let n = 0; n <= target; n++) { const s = document.createElement("span"); s.textContent = String(n % 10); strip.append(s); }
-        box.append(strip);
-        odo.append(box);
-        return { strip, target };
-      });
-      first.nodeValue = m[3];
-      num.insertBefore(odo, first);
-      num.insertBefore(sr, odo);
-      num._roll = (delay) => strips.forEach(({ strip, target }) => {
-        if (reduce) strip.style.transition = "none";
-        strip.style.transitionDelay = `${delay}s`;
-        strip.style.transform = `translateY(${-target * LH}em)`;
-      });
-    });
-    revealHooks.push((el) => {
-      if (!el.matches(".stat-card")) return;
-      const delay = parseFloat(el.style.getPropertyValue("--reveal-delay")) || 0;
-      el.querySelectorAll(".stat-number").forEach((n) => n._roll && n._roll(delay + 0.15));
-    });
-  });
-
-  /* ----------------------------------------------------------
-     Testimonial: lights up word by word as it scrolls into the reading zone
-  ---------------------------------------------------------- */
-  run("testimonial", () => {
-    const q = document.querySelector(".testimonial-quote");
-    if (!q || reduce) return;
-    const full = q.textContent.replace(/\s+/g, " ").trim();
-    const visual = document.createElement("span");
-    visual.setAttribute("aria-hidden", "true");
-    let i = 0;
-    const walk = (from, into) => {
-      from.childNodes.forEach((n) => {
-        if (n.nodeType === 3) {
-          n.nodeValue.split(/(\s+)/).forEach((part) => {
-            if (!part) return;
-            if (/^\s+$/.test(part)) { into.append(" "); return; }
-            const w = document.createElement("span");
-            w.className = "tq-w";
-            w.style.setProperty("--wi", i++);
-            w.textContent = part;
-            into.append(w);
-          });
-        } else if (n.nodeType === 1) {
-          const shell = n.cloneNode(false);
-          into.append(shell);
-          walk(n, shell);
-        }
-      });
+  run("cursor", () => {
+    if (!finePointer || reduce || !document.querySelector("[data-cursor]")) return;
+    const el = document.createElement("div");
+    el.className = "cursor";
+    el.setAttribute("aria-hidden", "true");
+    document.body.append(el);
+    let x = 0, y = 0, tx = 0, ty = 0, s = 0, ts = 0, raf = 0, label = "";
+    const tick = () => {
+      x += (tx - x) * 0.22; y += (ty - y) * 0.22; s += (ts - s) * 0.2;
+      el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) scale(${s.toFixed(3)})`;
+      raf = Math.abs(tx - x) + Math.abs(ty - y) + Math.abs(ts - s) > 0.05 ? requestAnimationFrame(tick) : 0;
     };
-    walk(q, visual);
-    const sr = document.createElement("span");
-    sr.className = "sr-only";
-    sr.textContent = full;
-    q.replaceChildren(sr, visual);
-    q.style.setProperty("--tn", i);
+    const update = (target) => {
+      const host = target && target.closest && target.closest("[data-cursor]");
+      if (host && s < 0.05) { x = tx; y = ty; }            // appear where the pointer is, don't fly in
+      ts = host ? 1 : 0;
+      if (host && host.dataset.cursor !== label) { label = host.dataset.cursor; el.textContent = label; }
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    addEventListener("pointermove", (e) => { tx = e.clientX; ty = e.clientY; update(e.target); }, { passive: true });
+    document.addEventListener("pointerleave", () => update(null));
+    fx.push(() => { if (ts || s > 0.05) update(document.elementFromPoint(tx, ty)); });   // the page moved under a still pointer
+  });
 
-    let top = 0, h = 0;
-    measures.push(() => { const r = q.getBoundingClientRect(); top = r.top + scrollY; h = r.height; });
-    fx.push((y, vh) => {
-      const t = top - y, start = vh * 0.94, end = vh * 0.62 - h * 0.5;
-      q.style.setProperty("--tp", clamp((start - t) / Math.max(1, start - end), 0, 1).toFixed(3));
+  /* ----------------------------------------------------------
+     Magnetic buttons lean toward the pointer
+  ---------------------------------------------------------- */
+  run("magnetic", () => {
+    if (!finePointer || reduce) return;
+    document.querySelectorAll("[data-magnetic]").forEach((el) => {
+      let ox = 0, oy = 0;
+      el.addEventListener("pointermove", (e) => {
+        const r = el.getBoundingClientRect();
+        const cx = r.left - ox + r.width / 2, cy = r.top - oy + r.height / 2;
+        ox = clamp((e.clientX - cx) * 0.22, -9, 9);
+        oy = clamp((e.clientY - cy) * 0.32, -7, 7);
+        el.classList.add("is-magnet");
+        el.style.translate = `${ox.toFixed(1)}px ${oy.toFixed(1)}px`;
+      });
+      el.addEventListener("pointerleave", () => { ox = oy = 0; el.classList.remove("is-magnet"); el.style.translate = ""; });
     });
   });
 
   /* ----------------------------------------------------------
-     Contact: the planet rises over the panel's edge; copy-the-address button; magnetic call to action
+     Parallax: pictures drift inside their frames ([data-parallax]); the case-study cover opens up
   ---------------------------------------------------------- */
-  run("contact", () => {
-    const panel = document.querySelector(".contact-inner");
-    if (panel && !reduce) {
-      let top = 0;
-      measures.push(() => { top = panel.getBoundingClientRect().top + scrollY; });
-      fx.push((y, vh) => panel.style.setProperty("--rise", clamp((vh - (top - y)) / (vh * 0.75), 0, 1).toFixed(3)));
+  run("parallax", () => {
+    if (reduce) return;
+    const els = Array.from(document.querySelectorAll("[data-parallax]"));
+    let boxes = [];
+    if (els.length) {
+      measures.push(() => { boxes = els.map((el) => { const r = el.getBoundingClientRect(); return { el, top: r.top + scrollY, h: r.height }; }); });
+      fx.push((y, vh) => boxes.forEach((b) => {
+        const c = (b.top + b.h / 2 - y - vh / 2) / (vh / 2 + b.h / 2);
+        if (c > -1.3 && c < 1.3) b.el.style.setProperty("--py", clamp(c, -1, 1).toFixed(3));
+      }));
     }
+    const cover = document.querySelector(".project-cover");
+    if (cover) {
+      let top = 0;
+      measures.push(() => { top = cover.getBoundingClientRect().top + scrollY; });
+      fx.push((y, vh) => cover.style.setProperty("--open", clamp(1 - (top - y - vh * 0.25) / (vh * 0.55), 0, 1).toFixed(3)));
+    }
+  });
 
+  /* ----------------------------------------------------------
+     Footer: the planet rises as you reach the end, the wordmark letters come up, and Amsterdam's local time
+  ---------------------------------------------------------- */
+  run("footer", () => {
+    const footer = document.querySelector(".site-footer");
+    if (!footer) return;
+    if (!reduce) {
+      let top = 0, h = 1;
+      measures.push(() => { const r = footer.getBoundingClientRect(); top = r.top + scrollY; h = Math.max(1, r.height); });
+      fx.push((y, vh) => footer.style.setProperty("--rise", clamp((vh - (top - y)) / h, 0, 1).toFixed(3)));
+      const mark = footer.querySelector(".wordmark");
+      if (mark) {
+        const text = mark.textContent;
+        mark.textContent = "";
+        Array.from(text).forEach((ch, i) => {
+          if (ch === " ") { mark.append(" "); return; }
+          const l = document.createElement("span");
+          l.className = "wl";
+          l.style.setProperty("--li", i);
+          l.textContent = ch;
+          mark.append(l);
+        });
+        mark.classList.add("is-split");
+        onceVisible(mark, () => mark.classList.add("split-in"));
+      }
+    }
+    const clocks = footer.querySelectorAll(".footer-clock");
+    if (clocks.length && window.Intl) {
+      const fmt = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Amsterdam", hour: "2-digit", minute: "2-digit", hour12: false });
+      const tick = () => {
+        const text = fmt.format(new Date()), hour = parseInt(text, 10);
+        clocks.forEach((c) => {
+          const t = c.querySelector("time");
+          if (t) { t.textContent = text; t.dateTime = text; }
+          c.classList.toggle("is-night", hour < 7 || hour >= 21);
+          c.hidden = false;
+        });
+      };
+      tick();
+      setInterval(tick, 15000);
+    }
+  });
+
+  /* ----------------------------------------------------------
+     Copy the e-mail address, with a confirmation that screen readers hear too
+  ---------------------------------------------------------- */
+  run("copy", () => {
     const status = document.getElementById("copy-status");
     document.querySelectorAll("[data-copy]").forEach((btn) => {
       const label = btn.querySelector(".btn-copy-label");
@@ -303,63 +356,8 @@
     });
   });
 
-  run("magnetic", () => {
-    if (!finePointer || reduce) return;
-    document.querySelectorAll("[data-magnetic]").forEach((el) => {
-      let ox = 0, oy = 0;
-      el.addEventListener("pointermove", (e) => {
-        const r = el.getBoundingClientRect();
-        const cx = r.left - ox + r.width / 2, cy = r.top - oy + r.height / 2;
-        ox = clamp((e.clientX - cx) * 0.22, -9, 9);
-        oy = clamp((e.clientY - cy) * 0.32, -7, 7);
-        el.classList.add("is-magnet");
-        el.style.translate = `${ox.toFixed(1)}px ${oy.toFixed(1)}px`;
-      });
-      el.addEventListener("pointerleave", () => { ox = oy = 0; el.classList.remove("is-magnet"); el.style.translate = ""; });
-    });
-  });
-
   /* ----------------------------------------------------------
-     Cards: a soft light follows the pointer and the edge catches it
-  ---------------------------------------------------------- */
-  run("spotlight", () => {
-    if (!finePointer) return;
-    document.querySelectorAll(".work-card, .stat-card").forEach((card) => {
-      card.classList.add("spot");
-      const ring = document.createElement("span");
-      ring.className = "glow-ring";
-      ring.setAttribute("aria-hidden", "true");
-      card.append(ring);
-      card.addEventListener("pointermove", (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty("--mx", `${(e.clientX - r.left).toFixed(0)}px`);
-        card.style.setProperty("--my", `${(e.clientY - r.top).toFixed(0)}px`);
-      });
-    });
-  });
-
-  /* ----------------------------------------------------------
-     Footer: what time it is in Amsterdam right now
-  ---------------------------------------------------------- */
-  run("clock", () => {
-    const clocks = document.querySelectorAll(".footer-clock");
-    if (!clocks.length || !window.Intl) return;
-    const fmt = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Amsterdam", hour: "2-digit", minute: "2-digit", hour12: false });
-    const tick = () => {
-      const now = new Date(), text = fmt.format(now), hour = parseInt(text, 10);
-      clocks.forEach((c) => {
-        const t = c.querySelector("time");
-        if (t) { t.textContent = text; t.dateTime = text; }
-        c.classList.toggle("is-night", hour < 7 || hour >= 21);
-        c.hidden = false;
-      });
-    };
-    tick();
-    setInterval(tick, 15000);
-  });
-
-  /* ----------------------------------------------------------
-     Case studies: open any picture large (keyboard, swipe, Esc), with a morph from the page where supported
+     Case studies: open any picture large (Esc, arrow keys, swipe), with a morph where supported
   ---------------------------------------------------------- */
   run("lightbox", () => {
     const imgs = Array.from(document.querySelectorAll(".project-cover > img, .shot-media > img"));
@@ -376,7 +374,6 @@
       btn.append(img);
       return { img, btn, caption: cap ? cap.textContent.trim() : "" };
     });
-
     const dlg = document.createElement("dialog");
     dlg.className = "lightbox";
     dlg.setAttribute("aria-label", "Image viewer");
@@ -406,18 +403,17 @@
     }
     function open(i) {
       const it = items[i];
-      const go = () => { show(i); dlg.showModal(); root.classList.add("lb-open"); };
+      const go = () => { show(i); dlg.showModal(); root.classList.add("lb-open"); if (JW.lenis) JW.lenis.stop(); };
       if (!canMorph) { dlg.classList.add("no-vt"); go(); return; }
       it.img.style.viewTransitionName = "lb-img";
-      const t = document.startViewTransition(() => { it.img.style.viewTransitionName = "none"; lbImg.style.viewTransitionName = "lb-img"; go(); });
-      t.finished.finally(() => { lbImg.style.viewTransitionName = ""; it.img.style.viewTransitionName = ""; });
+      const t = document.startViewTransition(() => { it.img.style.viewTransitionName = ""; lbImg.style.viewTransitionName = "lb-img"; go(); });
+      t.finished.finally(() => { lbImg.style.viewTransitionName = ""; });
     }
     function close() {
       if (!dlg.open) return;
       const it = items[cur];
-      // paged to a picture further down? bring it into view behind the backdrop, so you land where it lives (and so does focus)
-      if (!onScreen(it.btn)) it.btn.scrollIntoView({ block: "center", behavior: "instant" });
-      const done = () => { dlg.close(); root.classList.remove("lb-open"); live.textContent = ""; it.btn.focus({ preventScroll: true }); };
+      if (!onScreen(it.btn)) it.btn.scrollIntoView({ block: "center", behavior: "instant" });   // paged further down: land where that picture lives
+      const done = () => { dlg.close(); root.classList.remove("lb-open"); live.textContent = ""; if (JW.lenis) JW.lenis.start(); it.btn.focus({ preventScroll: true }); };
       if (!canMorph) { done(); return; }
       lbImg.style.viewTransitionName = "lb-img";
       const t = document.startViewTransition(() => { lbImg.style.viewTransitionName = ""; it.img.style.viewTransitionName = "lb-img"; done(); });
@@ -429,7 +425,6 @@
       void dlg.offsetWidth;
       dlg.classList.add("is-swapping");
     }
-
     items.forEach((it, i) => it.btn.addEventListener("click", () => open(i)));
     prev.addEventListener("click", () => step(-1));
     next.addEventListener("click", () => step(1));
@@ -444,34 +439,35 @@
     dlg.addEventListener("pointerdown", (e) => { sx = e.pointerType === "mouse" ? null : e.clientX; });
     dlg.addEventListener("pointerup", (e) => {
       if (sx === null || items.length < 2) return;
-      const dx = e.clientX - sx; sx = null;
+      const dx = e.clientX - sx;
+      sx = null;
       if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1);
     });
   });
 
   /* ----------------------------------------------------------
-     Between pages: only pictures that are actually on screen morph, and cards already in view
-     appear at once, so the picture always lands somewhere visible.
+     Between pages: the project picture you click grows into the case study's cover.
+     Only pictures that are on screen take part, and the card holding one is shown at once so it lands somewhere visible.
   ---------------------------------------------------------- */
   run("page-transitions", () => {
-    const targets = () => document.querySelectorAll(".work-card-visual-img, .project-cover img, .next-thumb img");
-    const prune = () => targets().forEach((el) => { if (!onScreen(el)) el.style.viewTransitionName = "none"; });
-    const restore = () => targets().forEach((el) => { el.style.viewTransitionName = ""; });
-    addEventListener("pageswap", (e) => { if (e.viewTransition) prune(); });
-    addEventListener("pageshow", (e) => { if (e.persisted) restore(); });
+    const named = () => document.querySelectorAll("[data-vt]");
+    const nameOnScreen = () => named().forEach((el) => { el.style.viewTransitionName = onScreen(el) ? `vt-${el.dataset.vt}` : ""; });
+    const clear = () => named().forEach((el) => { el.style.viewTransitionName = ""; });
+    addEventListener("pageswap", (e) => { if (e.viewTransition) nameOnScreen(); });
+    addEventListener("pageshow", (e) => { if (e.persisted) clear(); });
     addEventListener("pagereveal", (e) => {
       if (!e.viewTransition) return;
-      prune();
+      nameOnScreen();
       const shown = [];
       document.querySelectorAll("[data-reveal]:not(.is-visible)").forEach((el) => {
-        if (onScreen(el)) { el.classList.add("reveal-instant", "is-visible"); shown.push(el); }
+        if (el.querySelector("[data-vt]") && onScreen(el)) { el.classList.add("reveal-instant", "is-visible"); shown.push(el); }
       });
-      e.viewTransition.finished.finally(() => { restore(); shown.forEach((el) => el.classList.remove("reveal-instant")); });
+      e.viewTransition.finished.finally(() => { clear(); shown.forEach((el) => el.classList.remove("reveal-instant")); });
     });
   });
 
   /* ----------------------------------------------------------
-     Looping demo clips: play while on screen, pause when not. With reduced motion they stay paused and show controls.
+     Looping demo clips play while on screen. With reduced motion they stay paused and show controls.
   ---------------------------------------------------------- */
   run("videos", () => {
     const vids = document.querySelectorAll("video[data-loop]");
@@ -484,23 +480,7 @@
     vids.forEach((v) => { v.preload = "metadata"; io.observe(v); });
   });
 
-  /* ----------------------------------------------------------
-     About: the crew card tilts toward the pointer (skipped for touch and reduced motion)
-  ---------------------------------------------------------- */
-  run("crew-tilt", () => {
-    const crew = document.querySelector(".crew");
-    if (!crew || reduce || !finePointer) return;
-    const card = crew.querySelector(".crew-card");
-    crew.addEventListener("pointermove", (e) => {
-      const r = crew.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
-      card.style.setProperty("--ry", `${(x * 9).toFixed(2)}deg`);
-      card.style.setProperty("--rx", `${(-y * 7).toFixed(2)}deg`);
-    });
-    crew.addEventListener("pointerleave", () => { card.style.setProperty("--rx", "0deg"); card.style.setProperty("--ry", "0deg"); });
-  });
-
-  /* ---------- start the scroll-linked effects ---------- */
+  /* ---------- start ---------- */
   addEventListener("scroll", queue, { passive: true });
   addEventListener("resize", measure);
   addEventListener("load", measure);
