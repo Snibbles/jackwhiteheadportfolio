@@ -1,6 +1,6 @@
 /* ============================================================
-   Home page sections: hero, marquee, crew badge, stats, work stack, skill orbits, testimonial
-   and the contact headline. Uses the shared helpers from js/main.js (window.JW).
+   Home page sections: hero, marquee, crew badge, facts, work stack, testimonial and the contact headline.
+   (The toolbox planets are drawn by js/scene3d.js.) Uses the shared helpers from js/main.js (window.JW).
    Every effect sleeps while its section is off screen, and stays still when motion is reduced.
    ============================================================ */
 (() => {
@@ -87,8 +87,8 @@
   });
 
   /* ----------------------------------------------------------
-     Stats: each number rolls into place like an odometer (the visible digits are hidden from screen readers;
-     each stat carries its own plain-text version)
+     Facts: the numbers roll into place like an odometer (the digits are hidden from screen readers;
+     each fact carries its own plain-text version)
   ---------------------------------------------------------- */
   run("odometer", () => {
     const LH = 1.05;
@@ -112,8 +112,8 @@
       });
     });
     onReveal((el) => {
-      const num = el.querySelector && el.querySelector("[data-odo]");
-      if (num && num.roll) num.roll((parseFloat(el.style.getPropertyValue("--reveal-delay")) || 0) + 0.15);
+      const delay = (parseFloat(el.style.getPropertyValue("--reveal-delay")) || 0) + 0.2;
+      if (el.querySelectorAll) el.querySelectorAll("[data-odo]").forEach((num, k) => num.roll && num.roll(delay + k * 0.12));
     });
   });
 
@@ -150,64 +150,13 @@
   });
 
   /* ----------------------------------------------------------
-     Skills: four rings turn at their own pace and slow almost to a stop while you read them.
-     The legend (and pointing at a ring) brings one group forward.
-  ---------------------------------------------------------- */
-  run("orbits", () => {
-    const sys = document.querySelector(".orbits");
-    if (!sys) return;
-    const rings = Array.from(sys.querySelectorAll(".ring"));
-    const buttons = Array.from(sys.querySelectorAll(".orbits-legend button"));
-    let pinned = null;
-    const focus = (key) => {
-      if (key) sys.dataset.focus = key; else delete sys.dataset.focus;
-      rings.forEach((r) => r.classList.toggle("is-focus", r.dataset.group === key));
-      buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.group === pinned)));
-    };
-    buttons.forEach((b) => {
-      b.addEventListener("click", () => { pinned = pinned === b.dataset.group ? null : b.dataset.group; focus(pinned); });
-      b.addEventListener("pointerenter", () => focus(b.dataset.group));
-      b.addEventListener("pointerleave", () => focus(pinned));
-    });
-    rings.forEach((r) => {
-      r.addEventListener("pointerenter", () => { if (!pinned) focus(r.dataset.group); });
-      r.addEventListener("pointerleave", () => { if (!pinned) focus(null); });
-    });
-
-    const angles = rings.map((_, i) => i * 53);
-    rings.forEach((r, i) => r.style.setProperty("--spin", `${angles[i]}deg`));
-    const wide = matchMedia("(min-width: 1000px)");
-    if (reduce) return;
-    const speeds = rings.map((r) => (360 / (parseFloat(r.style.getPropertyValue("--dur")) || 80)) * (r.style.getPropertyValue("--dir").trim() === "reverse" ? -1 : 1));
-    let k = 1, target = 1;
-    sys.addEventListener("pointerenter", () => { target = 0.1; });
-    sys.addEventListener("pointerleave", () => { target = 1; });
-    whileVisible(sys, (dt) => {
-      if (!wide.matches) return false;
-      k += (target - k) * Math.min(1, dt * 3);
-      rings.forEach((r, i) => {
-        angles[i] = (angles[i] + speeds[i] * k * dt) % 360;
-        r.style.setProperty("--spin", `${angles[i].toFixed(2)}deg`);
-      });
-    });
-  });
-
-  /* ----------------------------------------------------------
      Testimonial: the quote lights up word by word as it scrolls into the reading zone,
-     and the signal waveform under it moves while it's on screen
+     and the light round the card's edge only travels while the card is on screen
   ---------------------------------------------------------- */
   run("testimonial", () => {
+    const card = document.querySelector(".quote-card");
     const q = document.querySelector(".testimonial-quote p");
-    const wave = document.querySelector(".wave");
-    if (wave) {
-      for (let i = 0; i < 30; i++) {
-        const bar = document.createElement("i");
-        bar.style.setProperty("--k", i);
-        bar.style.setProperty("--amp", (0.3 + 0.7 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.45))).toFixed(2));
-        wave.append(bar);
-      }
-      if (!reduce) new IntersectionObserver(([e]) => wave.classList.toggle("is-live", e.isIntersecting)).observe(wave);
-    }
+    if (card && !reduce) new IntersectionObserver(([e]) => card.classList.toggle("is-live", e.isIntersecting)).observe(card);
     if (!q || reduce) return;
     const sentence = q.textContent.replace(/\s+/g, " ").trim();
     const visual = document.createElement("span");

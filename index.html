@@ -45,7 +45,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/site.css?v=1">
+<link rel="stylesheet" href="css/site.css?v=2">
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
@@ -158,36 +158,33 @@
           <p class="about-bio" data-reveal>
             I have been studying <strong>digital design for 3 years</strong> so far, and I've learned a lot. On top of that I've worked at <strong>Brandium and Airworks</strong>, where I learned that <strong>good work happens in teams</strong>. I actually listen to feedback and use it to get better fast. I'm bilingual (English/Dutch), based in Amsterdam, studying at HvA, 21, and I'm here to do solid work and help make the people around me better at their jobs too.
           </p>
-          <dl class="about-facts" data-reveal>
-            <div><dt>Base</dt><dd>Amsterdam</dd></div>
-            <div><dt>Languages</dt><dd>English &middot; Dutch</dd></div>
-            <div><dt>Worked at</dt><dd>Brandium &middot; Airworks</dd></div>
-          </dl>
+          <div class="facts" data-reveal>
+            <ul class="facts-stats">
+              <li class="fact">
+                <p class="fact-num" aria-hidden="true"><span data-odo>4</span><span class="fact-unit">th</span></p>
+                <p class="fact-label"><span class="sr-only">Fourth </span>year at HvA, Communication &amp; Multimedia Design</p>
+              </li>
+              <li class="fact">
+                <p class="fact-num" aria-hidden="true"><span data-odo>6</span></p>
+                <p class="fact-label"><span class="sr-only">6 </span>client projects shipped so far</p>
+              </li>
+              <li class="fact">
+                <p class="fact-num" aria-hidden="true"><span data-odo>3</span></p>
+                <p class="fact-label"><span class="sr-only">3 </span>tools I use daily <a class="fact-link" href="#skills">See what else I know&nbsp;↓</a></p>
+              </li>
+              <li class="fact fact-live">
+                <p class="fact-num" aria-hidden="true">2027</p>
+                <p class="fact-label"><span class="status-dot" aria-hidden="true"></span>Open to internships &amp; junior roles<span class="sr-only"> in 2027</span></p>
+              </li>
+            </ul>
+            <dl class="facts-list">
+              <div><dt>Base</dt><dd>Amsterdam</dd></div>
+              <div><dt>Languages</dt><dd>English &middot; Dutch</dd></div>
+              <div><dt>Worked at</dt><dd>Brandium &middot; Airworks</dd></div>
+            </dl>
+          </div>
         </div>
       </div>
-
-      <ul class="stats">
-        <li class="stat" data-reveal>
-          <p class="stat-kicker" aria-hidden="true">Study</p>
-          <p class="stat-num" aria-hidden="true" data-odo>04</p>
-          <p class="stat-label"><span class="sr-only">Fourth </span>Year at HvA, Communication &amp; Multimedia Design</p>
-        </li>
-        <li class="stat" data-reveal>
-          <p class="stat-kicker" aria-hidden="true">Shipped</p>
-          <p class="stat-num" aria-hidden="true" data-odo>06</p>
-          <p class="stat-label"><span class="sr-only">6 </span>Client projects shipped so far</p>
-        </li>
-        <li class="stat" data-reveal>
-          <p class="stat-kicker" aria-hidden="true">Daily</p>
-          <p class="stat-num" aria-hidden="true" data-odo>03</p>
-          <p class="stat-label"><span class="sr-only">3 </span>Tools I use daily. <a class="stat-link" href="#skills">See what else I know&nbsp;↓</a></p>
-        </li>
-        <li class="stat stat-live" data-reveal>
-          <p class="stat-kicker" aria-hidden="true"><span class="status-dot"></span>Status</p>
-          <p class="stat-num" aria-hidden="true" data-odo>2027</p>
-          <p class="stat-label">Open to internships &amp; junior roles<span class="sr-only"> in 2027</span></p>
-        </li>
-      </ul>
     </div>
   </section>
 
@@ -273,64 +270,73 @@
     </div>
   </section>
 
-  <!-- SKILLS: tools in orbit (a plain grouped list on small screens) -->
+  <!-- SKILLS: one 3D planet per group (js/scene3d.js draws them in the slots), the tools listed underneath -->
   <section class="skills" id="skills" aria-labelledby="skills-title">
     <div class="section-inner">
-      <div class="section-head section-head-center">
-        <p class="eyebrow" data-reveal>Tools &amp; skills</p>
-        <h2 class="section-title" id="skills-title" data-split>In the toolbox</h2>
-        <p class="section-sub" data-reveal>Sixteen tools and skills in four orbits. Point at a group to bring it forward.</p>
-      </div>
-      <div class="orbits" data-reveal>
-        <div class="orbits-stage">
-          <div class="orbits-core" aria-hidden="true"><span class="core-num">16</span><span class="core-label">in orbit</span></div>
-          <ul class="ring" data-group="frontend" aria-label="Front-end basics" style="--r: 11.5; --tilt: 54deg; --roll: -16deg; --dur: 44s; --c: var(--mint); --n: 2">
-            <li style="--i: 0">HTML &amp; CSS</li>
-            <li style="--i: 1">A little JavaScript</li>
-          </ul>
-          <ul class="ring" data-group="motion" aria-label="Prototyping &amp; motion" style="--r: 18.5; --tilt: 60deg; --roll: 12deg; --dur: 62s; --dir: reverse; --c: var(--sun); --n: 3">
-            <li style="--i: 0">Premiere Pro</li>
-            <li style="--i: 1">After Effects</li>
-            <li style="--i: 2">Jitter</li>
-          </ul>
-          <ul class="ring" data-group="design" aria-label="Design" style="--r: 25.5; --tilt: 63deg; --roll: -7deg; --dur: 86s; --c: var(--coral); --n: 6">
-            <li style="--i: 0">Figma</li>
-            <li style="--i: 1">Adobe XD</li>
-            <li style="--i: 2">Illustrator</li>
-            <li style="--i: 3">Photoshop</li>
-            <li style="--i: 4">Miro</li>
-            <li style="--i: 5">Notion</li>
-          </ul>
-          <ul class="ring" data-group="theory" aria-label="Theory" style="--r: 32.5; --tilt: 66deg; --roll: 6deg; --dur: 118s; --dir: reverse; --c: var(--cobalt); --n: 5">
-            <li style="--i: 0">User research</li>
-            <li style="--i: 1">Wireframing</li>
-            <li style="--i: 2">Design systems</li>
-            <li style="--i: 3">Accessibility basics</li>
-            <li style="--i: 4">User testing / prototyping</li>
-          </ul>
+      <div class="section-head">
+        <div>
+          <p class="eyebrow" data-reveal>Tools &amp; skills</p>
+          <h2 class="section-title" id="skills-title" data-split>In the toolbox</h2>
         </div>
-        <div class="orbits-legend" role="group" aria-label="Bring a group forward">
-          <button type="button" aria-pressed="false" data-group="design" style="--c: var(--coral)">Design <span>6</span></button>
-          <button type="button" aria-pressed="false" data-group="motion" style="--c: var(--sun)">Prototyping &amp; motion <span>3</span></button>
-          <button type="button" aria-pressed="false" data-group="frontend" style="--c: var(--mint)">Front-end basics <span>2</span></button>
-          <button type="button" aria-pressed="false" data-group="theory" style="--c: var(--cobalt)">Theory <span>5</span></button>
-        </div>
+        <p class="section-sub" data-reveal>Sixteen tools and skills, grouped by what I use them for.</p>
       </div>
+      <ul class="systems">
+        <li class="system" data-system style="--c: var(--coral); --hole: 0.64">
+          <div class="system-planet" data-planet="design" data-size="1.0" aria-hidden="true"></div>
+          <h3 class="system-name" data-reveal>Design <span class="system-count">06</span></h3>
+          <ul class="system-tools" data-reveal>
+            <li>Figma</li>
+            <li>Adobe XD</li>
+            <li>Illustrator</li>
+            <li>Photoshop</li>
+            <li>Miro</li>
+            <li>Notion</li>
+          </ul>
+        </li>
+        <li class="system" data-system style="--c: var(--sun); --hole: 0.37">
+          <div class="system-planet" data-planet="motion" data-size="0.78" aria-hidden="true"></div>
+          <h3 class="system-name" data-reveal>Prototyping &amp; motion <span class="system-count">03</span></h3>
+          <ul class="system-tools" data-reveal>
+            <li>Premiere Pro</li>
+            <li>After Effects</li>
+            <li>Jitter</li>
+          </ul>
+        </li>
+        <li class="system" data-system style="--c: var(--mint); --hole: 0.32">
+          <div class="system-planet" data-planet="frontend" data-size="0.66" aria-hidden="true"></div>
+          <h3 class="system-name" data-reveal>Front-end <span class="system-count">02</span></h3>
+          <ul class="system-tools" data-reveal>
+            <li>HTML &amp; CSS</li>
+            <li>JavaScript</li>
+          </ul>
+        </li>
+        <li class="system" data-system style="--c: var(--cobalt); --hole: 0.43">
+          <div class="system-planet" data-planet="theory" data-size="0.92" aria-hidden="true"></div>
+          <h3 class="system-name" data-reveal>Theory <span class="system-count">05</span></h3>
+          <ul class="system-tools" data-reveal>
+            <li>User research</li>
+            <li>Wireframing</li>
+            <li>Design systems</li>
+            <li>Accessibility basics</li>
+            <li>User testing / prototyping</li>
+          </ul>
+        </li>
+      </ul>
     </div>
   </section>
 
-  <!-- TESTIMONIAL: an incoming transmission -->
+  <!-- TESTIMONIAL: a quote card with a light travelling round its edge -->
   <section class="testimonial" id="testimonial" aria-labelledby="testimonial-title">
     <div class="section-inner">
       <p class="eyebrow" id="testimonial-title" data-reveal>Kind words</p>
-      <figure class="transmission">
-        <p class="transmission-status" aria-hidden="true" data-reveal><i></i>Incoming transmission <span>&middot; Brandium, Amsterdam</span></p>
+      <figure class="quote-card" data-reveal>
+        <span class="quote-mark" aria-hidden="true">“</span>
         <blockquote class="testimonial-quote">
-          <p>“Jack is the kind of person who brings a good <em>energy</em> to every project. He’s thoughtful, easy to work with, and always willing to help make an idea better.”</p>
+          <p>Jack is the kind of person who brings a good <em>energy</em> to every project. He’s thoughtful, easy to work with, and always willing to help make an idea better.</p>
         </blockquote>
-        <figcaption class="testimonial-attribution" data-reveal>
-          <span class="wave" aria-hidden="true"></span>
-          <span class="attribution-name"><strong>Rens Koster</strong><span>Ex-colleague, Brandium</span></span>
+        <figcaption class="quote-by">
+          <span class="quote-avatar" aria-hidden="true">RK</span>
+          <span class="quote-name"><strong>Rens Koster</strong><span>Ex-colleague at Brandium</span></span>
         </figcaption>
       </figure>
     </div>
@@ -392,8 +398,8 @@
   </div>
 </footer>
 
-<script src="js/main.js?v=12"></script>
-<script src="js/home.js?v=1"></script>
-<script type="module" src="js/scene3d.js?v=34" onerror="window.__bootFail && window.__bootFail()"></script>
+<script src="js/main.js?v=13"></script>
+<script src="js/home.js?v=2"></script>
+<script type="module" src="js/scene3d.js?v=35" onerror="window.__bootFail && window.__bootFail()"></script>
 </body>
 </html>

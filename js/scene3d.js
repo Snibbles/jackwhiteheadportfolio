@@ -35,7 +35,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
   root.classList.add('has-3d'); root.classList.remove('no-3d');
 
   // Resolution is what decides how hard this runs (the scene itself is light), so it adapts: measured once at start, then watched.
-  let dprCap = 1.5, probed = false, lite = false, storedQuality = false;
+  let dprCap = 1.75, probed = false, lite = false, storedQuality = false;
   try {
     const v = parseFloat(sessionStorage.getItem('jw-dprcap')); if (v > 0.5 && v < 4) { dprCap = v; probed = true; storedQuality = true; }
     if (sessionStorage.getItem('jw-lite') === '1') lite = true;
@@ -54,7 +54,8 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
   const PAL = {
     cobalt: [0x1B2C9E, 0x3F66F5, 0x9DB6FF, 0xB8CBFF], coral: [0x8E2147, 0xF2552F, 0xFF9C7C, 0xFFC2A8], sun: [0x9A5B12, 0xF5C443, 0xFFE9A8, 0xFFF0C4],
     violet: [0x35207A, 0x7C5CFF, 0xC4B6FF, 0xD8CEFF], mint: [0x0E5560, 0x2EC4B6, 0xA9F3E6, 0xC4FFF4], slate: [0x171A2B, 0x343A57, 0x7E86AE, 0x9FB0FF],
-    stone: [0x332A3F, 0x6B5A70, 0xB5A3AE, 0xB7C4FF], cream: [0xB9B3C9, 0xEFEBE2, 0xFFFFFF, 0xDCE6FF]
+    stone: [0x332A3F, 0x6B5A70, 0xB5A3AE, 0xB7C4FF], cream: [0xB9B3C9, 0xEFEBE2, 0xFFFFFF, 0xDCE6FF],
+    dusk: [0x271C6E, 0x5B48D8, 0xA898FF, 0xC9BEFF]
   };
   const INK = 0x10132A, CREAM = 0xF3F0E8;
   const FIRE = { deep: 0xD6301A, orange: 0xFF7A1C, yellow: 0xFFC62D, core: 0xFFF3C8, hot: 0xFF8A2A, hotCore: 0xFFC74A };
@@ -64,10 +65,14 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 
   const CEL_VERT = `varying vec3 vN; varying vec3 vV; varying float vDepth; varying vec3 vP;
     void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vV = -mv.xyz; vDepth = -mv.z; vP = position; gl_Position = projectionMatrix * mv; }`;
+  // toon shading with anti-aliased band edges: the same three flat bands, but the borders between them are smooth instead of stair-stepped
+  const AA_GLSL = `float aastep(float edge, float x){ float w = fwidth(x) * 0.75 + 1e-4; return smoothstep(edge - w, edge + w, x); }`;
   const CEL_FUNCS = `uniform vec3 uL, uFogCol; uniform float uFogD, uFogK; varying vec3 vN; varying vec3 vV; varying float vDepth; varying vec3 vP;
+    ${AA_GLSL}
+    vec3 toon3(vec3 S, vec3 M, vec3 L, float d){ return mix(mix(S, M, aastep(-0.05, d)), L, aastep(0.5, d)); }
     vec3 finish(vec3 c, vec3 n, float d, vec3 cR){
       float rim = 1.0 - max(dot(n, normalize(vV)), 0.0);
-      c = mix(c, cR, step(0.76, rim) * step(d, 0.30));
+      c = mix(c, cR, aastep(0.76, rim) * (1.0 - aastep(0.30, d)));
       return mix(c, uFogCol, clamp((vDepth - uFogD) * uFogK, 0.0, 0.86));
     }`;
 
@@ -79,7 +84,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
       uniforms: { ...SU, cS: { value: new THREE.Color(t[0]) }, cM: { value: new THREE.Color(t[1]) }, cL: { value: new THREE.Color(t[2]) }, cR: { value: new THREE.Color(t[3]) } },
       vertexShader: CEL_VERT,
       fragmentShader: `${CEL_FUNCS} uniform vec3 cS, cM, cL, cR;
-        void main(){ vec3 n = normalize(vN); float d = dot(n, uL); vec3 c = d > 0.5 ? cL : (d > -0.05 ? cM : cS);
+        void main(){ vec3 n = normalize(vN); float d = dot(n, uL); vec3 c = toon3(cS, cM, cL, d);
           gl_FragColor = vec4(finish(c, n, d, cR), 1.0);
           #include <colorspace_fragment>
         }`
@@ -133,27 +138,25 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
   /* ---------- planets: toon-lit spheres with a pattern, optional ring, moon and a soft atmosphere ---------- */
   const PLANET_FRAG = `${CEL_FUNCS} uniform int uKind; uniform float uSeed; uniform vec3 aS, aM, aL, bS, bM, bL, cR;
     float h(float n){ return fract(sin(n * 91.345 + uSeed * 17.31) * 43758.5453); }
-    vec3 band3(vec3 S, vec3 M, vec3 L, float d){ return d > 0.5 ? L : (d > -0.05 ? M : S); }
     void main(){
-      vec3 n = normalize(vN); float d = dot(n, uL), p3 = 0.0; vec3 p = normalize(vP); float w = 0.0;
-      if (uKind == 1) {
+      vec3 n = normalize(vN), p = normalize(vP); float d = dot(n, uL);
+      vec3 cA = toon3(aS, aM, aL, d), cB = toon3(bS, bM, bL, d), c = cA;
+      if (uKind == 1) {                                   // banded gas giant: soft-edged stripes
         float y = p.y + 0.07 * sin(p.x * 6.0 + uSeed) + 0.05 * sin(p.z * 8.0 + uSeed * 2.0);
-        w = mod(floor(y * 4.5 + uSeed), 2.0);
-      } else if (uKind == 2) {
+        c = mix(cA, cB, 1.0 - aastep(0.0, sin((y * 4.5 + uSeed) * 3.14159265)));
+      } else if (uKind == 2) {                            // cratered moon
+        float inside = 0.0, rimLit = 0.0;
         for (int i = 0; i < 6; i++) {
-          float fi = float(i); vec3 c = normalize(vec3(h(fi * 3.1) - 0.5, h(fi * 5.3 + 1.0) - 0.5, h(fi * 7.7 + 2.0) - 0.5));
-          float r = 0.20 + 0.16 * h(fi * 9.1 + 3.0), cd = dot(p, c);
-          if (cd > cos(r)) w = 1.0;
-          if (cd > cos(r) && cd < cos(r * 0.8)) w = 2.0;
+          float fi = float(i); vec3 cc = normalize(vec3(h(fi * 3.1) - 0.5, h(fi * 5.3 + 1.0) - 0.5, h(fi * 7.7 + 2.0) - 0.5));
+          float r = 0.20 + 0.16 * h(fi * 9.1 + 3.0), cd = dot(p, cc), k = aastep(cos(r), cd);
+          inside = max(inside, k); rimLit = max(rimLit, k * (1.0 - aastep(cos(r * 0.8), cd)));
         }
-      } else if (uKind == 3) {
+        c = mix(mix(cA, cB, inside), toon3(mix(aS, aM, 0.5), mix(aM, aL, 0.5), aL, d), rimLit);
+      } else if (uKind == 3) {                            // land, sea and ice caps
         float land = sin(p.x * 3.2 + uSeed) * sin(p.y * 3.8 + 1.0) * sin(p.z * 3.4 + 2.0) + 0.45 * sin(p.x * 6.5 + p.y * 5.0 + uSeed * 1.7) + 0.2 * sin(p.z * 9.0 + p.x * 4.0);
-        w = step(0.22, land); if (abs(p.y) > 0.88) w = 2.0;
+        c = mix(cA, cB, aastep(0.22, land));
+        c = mix(c, toon3(vec3(0.62, 0.66, 0.82), vec3(0.93, 0.94, 0.98), vec3(1.0), d), aastep(0.88, abs(p.y)));
       }
-      vec3 c;
-      if (w < 0.5) c = band3(aS, aM, aL, d);
-      else if (w < 1.5) c = band3(bS, bM, bL, d);
-      else c = (uKind == 2) ? band3(mix(aS, aM, 0.5), mix(aM, aL, 0.5), aL, d) : band3(vec3(0.62, 0.66, 0.82), vec3(0.93, 0.94, 0.98), vec3(1.0), d);
       gl_FragColor = vec4(finish(c, n, d, cR), 1.0);
       #include <colorspace_fragment>
     }`;
@@ -173,7 +176,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
       fragmentShader: `${CEL_FUNCS} uniform vec3 aM, aS, bM, bS;
         void main(){
           float r = length(vP.xy); if (r > 0.80 && r < 0.84) discard; if (r > 0.955 && r < 0.985) discard;
-          vec3 n = normalize(vN) * (gl_FrontFacing ? 1.0 : -1.0); float d = dot(n, uL), lit = step(-0.05, d);
+          vec3 n = normalize(vN) * (gl_FrontFacing ? 1.0 : -1.0); float d = dot(n, uL), lit = aastep(-0.05, d);
           vec3 c = r < 0.80 ? mix(aS, aM, lit) : (r < 0.955 ? mix(bS, bM, lit) : mix(aS, aM, lit * 0.6));
           gl_FragColor = vec4(finish(c, n, d, c), 1.0);
           #include <colorspace_fragment>
@@ -301,33 +304,54 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
   /* ---------- the landing: a floating asteroid with a pad on top (the top of the pad is y = 0) ---------- */
   const heroG = new THREE.Group(); scene.add(heroG);
   const platform = new THREE.Group(); heroG.add(platform);
-  function layer(w, h, d, y, name, r = 0.03) {
-    const m = solid(new RoundedBoxGeometry(w, h, d, 4, r), name, 0.007); m.position.y = y - h / 2; platform.add(m); return m;
-  }
-  layer(0.60, 0.060, 0.46, -0.045, 'cobalt');     // trim
-  layer(0.55, 0.045, 0.42, 0.0, 'cream');         // the pad
+  // a round, bevelled deck built at its real size, so its ink outline keeps an even thickness
+  const discGeo = (R, H, b) => new THREE.LatheGeometry([[0.0001, -H / 2], [R - b, -H / 2], [R, -H / 2 + b], [R, H / 2 - b], [R - b, H / 2], [0.0001, H / 2]].map(q => new THREE.Vector2(q[0], q[1])), 72);
+  { const rim = solid(discGeo(0.315, 0.06, 0.016), 'cobalt', 0.007); rim.position.y = -0.075; platform.add(rim); }     // the trim
+  { const deck = solid(discGeo(0.285, 0.045, 0.012), 'cream', 0.006); deck.position.y = -0.0225; platform.add(deck); } // the pad (its top is y = 0)
   const rock1 = islandGeo(0.31, 0.27, 2.0), rock2 = islandGeo(0.14, 0.2, 9.0);
-  { const m = new THREE.Group(); m.add(new THREE.Mesh(rock1, celMat('stone')), new THREE.Mesh(rock1, hullMat(0.008, true))); m.scale.set(1, 1, 0.78); m.position.y = -0.095 - 0.135; platform.add(m); }
+  { const m = new THREE.Group(); m.add(new THREE.Mesh(rock1, celMat('stone')), new THREE.Mesh(rock1, hullMat(0.008, true))); m.position.y = -0.095 - 0.135; platform.add(m); }
   { const m = new THREE.Group(); m.add(new THREE.Mesh(rock2, celMat('slate')), new THREE.Mesh(rock2, hullMat(0.006, true))); m.position.set(-0.17, -0.12 - 0.1, 0.07); m.rotation.y = 0.8; platform.add(m); }
   { const m = new THREE.Group(); m.add(new THREE.Mesh(rock2, celMat('stone')), new THREE.Mesh(rock2, hullMat(0.006, true))); m.position.set(0.15, -0.11 - 0.1, -0.05); m.scale.set(0.8, 0.9, 0.8); platform.add(m); }
   const pad = new THREE.Mesh(new THREE.CircleGeometry(0.21, 64), new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2,
     uniforms: { c: { value: new THREE.Color(PAL.coral[1]) } },
     vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: `uniform vec3 c; varying vec2 vUv;
+    fragmentShader: `uniform vec3 c; varying vec2 vUv; ${AA_GLSL}
       void main(){ vec2 p = (vUv - 0.5) * 0.42; float r = length(p);
-        float ring = step(abs(r - 0.172), 0.0058), dash = step(0.5, fract(atan(p.y, p.x) * 14.0 / 6.2831853)), ring2 = step(abs(r - 0.125), 0.003) * dash;
-        if (ring + ring2 < 0.5) discard; gl_FragColor = vec4(c, 1.0);
+        float ring = 1.0 - aastep(0.0058, abs(r - 0.172)), dash = aastep(0.5, fract(atan(p.y, p.x) * 14.0 / 6.2831853)), ring2 = (1.0 - aastep(0.003, abs(r - 0.125))) * dash;
+        float a = max(ring, ring2); if (a < 0.01) discard; gl_FragColor = vec4(c, a);
         #include <colorspace_fragment>
       }`
   }));
   pad.rotation.x = -Math.PI / 2; pad.position.y = 0.002; platform.add(pad);
-  // props on the pad: a crate, a beacon, a little crystal cluster
-  const crate = solid(GEO.cube, 'coral', 0.0045); crate.scale.setScalar(0.07); crate.position.set(-0.225, 0.037, -0.12); crate.rotation.y = 0.5; platform.add(crate);
+  // a ring of lights around the edge of the pad, with a pulse running round it
+  const N_LIGHTS = 20, lightPos = new Float32Array(N_LIGHTS * 3), lightA = new Float32Array(N_LIGHTS);
+  for (let i = 0; i < N_LIGHTS; i++) { const a = (i / N_LIGHTS) * Math.PI * 2; lightPos.set([Math.cos(a) * 0.3, -0.041, Math.sin(a) * 0.3], i * 3); lightA[i] = a; }
+  const lightGeo = new THREE.BufferGeometry();
+  lightGeo.setAttribute('position', new THREE.BufferAttribute(lightPos, 3)); lightGeo.setAttribute('aA', new THREE.BufferAttribute(lightA, 1));
+  const padLights = new THREE.Points(lightGeo, new THREE.ShaderMaterial({
+    uniforms: { uTime: sparkleTime, uPx: { value: 800 }, c: { value: new THREE.Color(PAL.sun[1]) } }, transparent: true, depthWrite: false,
+    vertexShader: `uniform float uTime, uPx; attribute float aA; varying float vB;
+      void main(){ vB = 0.4 + 0.6 * pow(max(0.0, cos(aA - uTime * 1.4)), 10.0);
+        vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = 0.032 * uPx / -mv.z; gl_Position = projectionMatrix * mv; }`,
+    // solid gold bulbs with a soft glow (blended, not added, so they stay gold on the pale rim); the pulse heats them up as it passes
+    fragmentShader: `uniform vec3 c; varying float vB;
+      void main(){ float r = length(gl_PointCoord - 0.5) * 2.0;
+        float core = 1.0 - smoothstep(0.2, 0.36, r), glow = exp(-r * r * 5.0) * 0.5 * vB;
+        gl_FragColor = vec4(mix(c, vec3(1.0, 0.96, 0.84), core * vB * vB * 0.6), max(core * (0.6 + 0.4 * vB), glow));
+        #include <colorspace_fragment>
+      }`
+  }));
+  padLights.frustumCulled = false; platform.add(padLights);
+  // soft light: under the asteroid (it floats) and behind the head (it stands out from the planet)
+  { const g = new THREE.Mesh(GEO.billboard, haloMat(0x4B73FF, 0.34)); g.scale.setScalar(0.44); g.position.set(0, -0.2, -0.2); g.renderOrder = -2; g.userData.isHalo = true; platform.add(g); }
+  { const g = new THREE.Mesh(GEO.billboard, haloMat(0xFF8A66, 0.17)); g.scale.setScalar(0.62); g.position.set(0, 0.3, -0.5); g.renderOrder = -2; g.userData.isHalo = true; heroG.add(g); }
+  // props on the pad: a beacon with a glowing bulb, and a little crystal cluster
   const beacon = new THREE.Group();
-  { const b = solid(GEO.cyl, 'cobalt', 0.0045); b.scale.set(0.05, 0.085, 0.05); b.position.y = 0.0425; const t = solid(GEO.sphere, 'sun', 0.0045, true); t.scale.setScalar(0.045); t.position.y = 0.105; beacon.add(b, t); }
-  beacon.position.set(0.23, 0.0, -0.115); platform.add(beacon);
-  for (const [x, z, s, r] of [[0.225, 0.13, 0.085, 0.2], [0.265, 0.1, 0.055, -0.3], [0.19, 0.16, 0.05, 0.5]]) {
+  { const b = solid(GEO.cyl, 'cobalt', 0.0045); b.scale.set(0.05, 0.085, 0.05); b.position.y = 0.0425; const t = solid(GEO.sphere, 'sun', 0.0045, true); t.scale.setScalar(0.045); t.position.y = 0.105;
+    const glow = new THREE.Mesh(GEO.billboard, haloMat(PAL.sun[1], 0.7)); glow.scale.setScalar(0.07); glow.position.y = 0.105; glow.userData.isHalo = true; beacon.add(b, t, glow); }
+  beacon.position.set(0.225, 0.0, -0.13); platform.add(beacon);
+  for (const [x, z, s, r] of [[-0.2, 0.12, 0.085, 0.2], [-0.235, 0.085, 0.055, -0.3], [-0.165, 0.15, 0.05, 0.5]]) {
     const c = solid(GEO.crystal, 'mint', 0.03, true); c.scale.setScalar(s); c.position.set(x, s * 0.6, z); c.rotation.set(0.1, r, r * 0.5); platform.add(c);
   }
 
@@ -515,22 +539,19 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 
   /* ---------- things floating around the head (they ride with the asteroid) ---------- */
   const heroDefs = [
-    { kind: 'ring', pal: ['sun', 'coral'], ringPal: ['cream', 'sun'], s: 0.15, p: [0.35, 0.50, 0.0], spin: 0.5 },
-    { kind: 'moon', pal: 'slate', s: 0.10, p: [-0.31, 0.50, -0.10], spin: 0.4, seed: 2.0 },
-    { kind: 'rock', pal: 'stone', rk: 0, s: 0.13, p: [-0.37, 0.20, -0.12], spin: [0.2, 0.35, 0.1] },
-    { kind: 'rock', pal: 'coral', rk: 1, s: 0.075, p: [0.41, 0.17, 0.05], spin: [0.5, 0.3, 0.4] },
-    { kind: 'rock', pal: 'slate', rk: 3, s: 0.055, p: [0.13, 0.64, -0.20], spin: [0.4, 0.6, 0.2] },
-    { kind: 'crystal', pal: 'violet', s: 0.075, p: [-0.20, 0.66, 0.02], spin: [0.2, 0.7, 0.1] },
-    { kind: 'rock', pal: 'cream', rk: 2, s: 0.04, p: [-0.28, -0.30, 0.10], spin: [0.5, 0.2, 0.5] },
-    { kind: 'sparkle', pal: 'cream', s: 0.025, p: [0.20, 0.38, 0.12] }, { kind: 'sparkle', pal: 'sun', s: 0.02, p: [-0.38, 0.40, 0.1] },
-    { kind: 'sparkle', pal: 'cream', s: 0.018, p: [0.43, 0.30, -0.05] }, { kind: 'sparkle', pal: 'coral', s: 0.02, p: [-0.12, 0.74, -0.1] }
+    // framed round the head and kept clear of the header: a planet high on the right, a moon high on the left, a rock and a crystal lower down
+    { kind: 'ring', pal: ['sun', 'coral'], ringPal: ['cream', 'sun'], s: 0.15, p: [0.38, 0.37, -0.06], spin: 0.5 },
+    { kind: 'moon', pal: 'slate', s: 0.09, p: [-0.35, 0.42, -0.12], spin: 0.4, seed: 2.0 },
+    { kind: 'rock', pal: 'coral', rk: 1, s: 0.07, p: [0.41, 0.12, 0.06], spin: [0.5, 0.3, 0.4] },
+    { kind: 'crystal', pal: 'violet', s: 0.055, p: [-0.37, 0.2, 0.04], spin: [0.2, 0.7, 0.1] },
+    { kind: 'sparkle', pal: 'cream', s: 0.024, p: [0.25, 0.5, 0.12] }, { kind: 'sparkle', pal: 'coral', s: 0.02, p: [-0.19, 0.53, -0.08] }
   ];
   const heroObjs = heroDefs.map((d, i) => {
     const o = makeObj(d); o.userData.i = i; o.userData.base = new THREE.Vector3(...d.p); o.position.copy(o.userData.base); o.scale.setScalar(d.s); heroG.add(o); return o;
   });
 
   /* ---------- the big planet looming behind the head (a long way back, so it drifts slower than the page) ---------- */
-  const backdrop = makeObj({ kind: 'bands', pal: ['violet', 'cobalt'], s: 1, seed: 3.0, halo: 0.28 });
+  const backdrop = makeObj({ kind: 'bands', pal: ['violet', 'dusk'], s: 1, seed: 3.0, halo: 0.3 });      // calm, low-contrast bands: a backdrop, not a pattern
   scene.add(backdrop);
 
   /* ---------- scenery down the page, anchored to sections ---------- */
@@ -541,7 +562,6 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
     { sec: 'work', f: 0.36, ex: 1.04, kind: 'rock', pal: 'coral', rk: 1, s: 0.13, z: -0.5, m: 1 },
     { sec: 'work', f: 0.60, ex: -1.04, kind: 'rock', pal: 'stone', rk: 2, s: 0.09, z: -0.3, m: 0 },
     { sec: 'work', f: 0.84, ex: 1.10, kind: 'moon', pal: 'slate', s: 0.24, z: -1.0, m: 1, seed: 4.0 },
-    { sec: 'skills', f: 0.30, ex: -1.24, kind: 'bands', pal: ['mint', 'cobalt'], s: 0.40, z: -1.9, m: 1, halo: 0.26, seed: 2.0 },
     { sec: 'skills', f: 0.80, ex: 1.04, kind: 'rock', pal: 'stone', rk: 3, s: 0.12, z: -0.4, m: 0 },
     { sec: 'skills', f: 0.12, ex: 1.06, kind: 'crystal', pal: 'mint', s: 0.11, z: -0.3, m: 1 },
     { sec: 'testimonial', f: 0.5, ex: -1.06, kind: 'moon', pal: 'cream', s: 0.17, z: -0.7, m: 1, seed: 1.0 },
@@ -565,7 +585,51 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
     const o = makeObj(d); Object.assign(o.userData, { i, aspin: [0.12 + (i % 3) * 0.06, 0.18 + (i % 4) * 0.05, 0.08], phase: i * 1.7 }); ambientG.add(o); return o;
   });
 
+  /* ---------- the toolbox: one planet per group of skills, drawn exactly in the slot the page leaves for it (data-planet) ---------- */
+  const SKILL_PLANETS = {
+    design: { kind: 'ring', pal: ['coral', 'sun'], ringPal: ['cream', 'coral'], seed: 1.0, halo: 0.22 },
+    motion: { kind: 'bands', pal: ['sun', 'coral'], seed: 2.6, moon: true, halo: 0.2 },
+    frontend: { kind: 'earth', pal: ['mint', 'cobalt'], seed: 3.0, halo: 0.2 },
+    theory: { kind: 'bands', pal: ['cobalt', 'violet'], seed: 4.2, halo: 0.22 }
+  };
+  const skillPlanets = Array.from(document.querySelectorAll('[data-planet]')).filter(el => SKILL_PLANETS[el.dataset.planet]).map((el, i) => {
+    const o = makeObj({ ...SKILL_PLANETS[el.dataset.planet], s: 1 });
+    Object.assign(o.userData, { slot: el, size: parseFloat(el.dataset.size) || 1, phase: i * 1.9, ang: i * 1.3, spinK: 1, spinTo: 1, grow: 1, growTo: 1, placed: false });
+    const group = el.closest('[data-system]') || el;            // pointing at a column makes its planet spin up and lean in
+    group.addEventListener('pointerenter', () => { o.userData.spinTo = 5; o.userData.growTo = 1.08; poke(); });
+    group.addEventListener('pointerleave', () => { o.userData.spinTo = 1; o.userData.growTo = 1; poke(); });
+    o.visible = false; scene.add(o); return o;
+  });
+  function placeSkillPlanets() {             // on layout: where each slot sits on the page, and how big its planet is
+    skillPlanets.forEach(o => {
+      const d = o.userData, r = d.slot.getBoundingClientRect();
+      d.placed = r.width > 0 && r.height > 0;
+      if (!d.placed) return;
+      d.cx = r.left + r.width / 2; d.cy = r.top + window.scrollY + r.height / 2;
+      d.rpx = (Math.min(r.width, r.height) * d.size * (d.kind === 'ring' ? 0.56 : 0.86)) / 2;    // a ringed planet leaves room for its ring
+    });
+  }
+  function updateSkillPlanets(t, dt) {
+    const sy = window.scrollY;
+    skillPlanets.forEach(o => {
+      const d = o.userData, y = d.cy - sy;
+      o.visible = d.placed && y > -state.vh * 0.5 && y < state.vh * 1.5;
+      if (!o.visible) return;
+      d.spinK += (d.spinTo - d.spinK) * Math.min(1, dt * 4); d.grow += (d.growTo - d.grow) * Math.min(1, dt * 6);
+      if (!reduce) d.ang += dt * 0.35 * d.spinK;
+      if (d.spinT) d.spinT.rotation.y = d.ang;
+      if (d.moonP) d.moonP.rotation.y = d.ang * 1.6;
+      // pinned to its slot every frame: the camera looks down a little, so perspective would otherwise let it drift as you scroll
+      const ndcY = 1 - (2 * y) / state.vh, centre = worldAtNdc((d.cx / state.vw) * 2 - 1, ndcY, 0), edge = worldAtNdc(((d.cx + d.rpx) / state.vw) * 2 - 1, ndcY, 0);
+      const r = centre.distanceTo(edge);
+      o.position.set(centre.x, centre.y + (reduce ? 0 : Math.sin(t * 0.8 + d.phase) * r * 0.06), centre.z);
+      o.rotation.z = reduce ? 0 : Math.sin(t * 0.3 + d.phase) * 0.04;
+      o.scale.setScalar(2 * r * d.grow);
+    });
+  }
+
   /* ---------- the head (async) ---------- */
+  const HEAD_URL = new URL('../assets/head-web.glb', import.meta.url).href;
   let head = null, headReady = false;
   function smoothNormals(geo, iters) {
     const pos = geo.attributes.position, nrm = geo.attributes.normal, idx = geo.index.array, n = pos.count;
@@ -665,15 +729,16 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
       vertexShader: `attribute vec3 aN; varying vec3 vN; varying vec3 vV; varying vec2 vUv; varying vec2 vYZ;
         void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * aN); vV = -mv.xyz; vUv = uv; vYZ = position.yz; gl_Position = projectionMatrix * mv; }`,
       fragmentShader: `uniform vec3 uShadow, uMid, uLight, uInk, uL, uHot, uHotCore, uRim; uniform float uGlow; uniform sampler2D map; varying vec3 vN; varying vec3 vV; varying vec2 vUv; varying vec2 vYZ;
+        ${AA_GLSL}
         void main(){ vec3 n = normalize(vN); float d = dot(n, uL);
-          vec3 c = d > 0.45 ? uLight : (d > -0.10 ? uMid : uShadow);
+          vec3 c = mix(mix(uShadow, uMid, aastep(-0.10, d)), uLight, aastep(0.45, d));
           float lum = dot(texture2D(map, vUv).rgb, vec3(0.2126, 0.7152, 0.0722));
           float above = vYZ.x - max(0.0, 0.30 * (0.035 - vYZ.y));
           c = mix(c, uHot, uGlow * (1.0 - smoothstep(0.026, 0.031, above)));
           c = mix(c, uHotCore, uGlow * (1.0 - smoothstep(0.009, 0.013, above)));
           c = mix(c, uInk, 1.0 - smoothstep(0.10, 0.17, lum));
           float rim = 1.0 - max(dot(n, normalize(vV)), 0.0);              // a cool back-light, so the dark hair keeps its shape against the dark sky
-          c = mix(c, uRim, step(0.80, rim) * step(d, 0.30));
+          c = mix(c, uRim, aastep(0.80, rim) * (1.0 - aastep(0.30, d)));
           gl_FragColor = vec4(c, 1.0);
           #include <colorspace_fragment>
         }`
@@ -686,7 +751,8 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
         #include <colorspace_fragment>
       }`
     })));
-    yawG.add(gltf.scene); fitFlameToHead(); headReady = true;
+    if (hero) { yawG.add(gltf.scene); fitFlameToHead(); }        // the landing rocket only exists on the home page
+    headReady = true;
     buildFinale(gltf.scene);
   }
 
@@ -736,17 +802,25 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
   if (hero) {
     setMeter(0);
     let fake = 0; const fakeTimer = setInterval(() => { fake = Math.min(fake + 0.04, 0.9); if (!headReady) setMeter(Math.max(fake, 0)); }, 120);
-    new GLTFLoader().load('assets/head-web.glb', g => { clearInterval(fakeTimer); setMeter(1); buildHead(g); startLaunch(); },
+    new GLTFLoader().load(HEAD_URL, g => { clearInterval(fakeTimer); setMeter(1); buildHead(g); startLaunch(); },
       x => { if (x.total) { clearInterval(fakeTimer); setMeter(Math.min(x.loaded / x.total, 0.98)); } }, () => { clearInterval(fakeTimer); fallback(); });
     // on a very slow connection the page doesn't wait for the head: everything shows, and the head pops onto its pad when it arrives
     setTimeout(() => { if (!launched && !skipIntro) { skipIntro = true; root.classList.add('skip-intro'); clearInterval(fakeTimer); if (meter) meter.classList.add('done'); reveal(); } }, 6000);
-  } else { heroG.visible = false; backdrop.visible = false; root.classList.add('hero-landed'); }
+  } else {
+    heroG.visible = false; backdrop.visible = false; root.classList.add('hero-landed');
+    // other pages only need the head for the footer: fetch it when the reader gets near the bottom
+    const horizon = document.querySelector('.site-footer .horizon');
+    if (horizon) {
+      const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { io.disconnect(); new GLTFLoader().load(HEAD_URL, buildHead); } }, { rootMargin: '0px 0px 150% 0px' });
+      io.observe(horizon);
+    }
+  }
 
   /* ---------- layout: head big on the right (desktop) / on top (phone); scroll moves the camera ---------- */
   const state = { vw: 1, vh: 1, aspect: 1, HV: 1, D: 3, PXW: 0.001, mobile: false, maxScroll: 1 }, perf = {};
   function updatePx() {
     const px = state.vh * DPR / (2 * Math.tan(THREE.MathUtils.degToRad(FOV / 2)));
-    sparkMat.uniforms.uPx.value = px; burstMat.uniforms.uPx.value = px;
+    sparkMat.uniforms.uPx.value = px; burstMat.uniforms.uPx.value = px; padLights.material.uniforms.uPx.value = px;
   }
   function setDpr(v) { DPR = v; renderer.setPixelRatio(v); BGU.uDpr.value = v; updatePx(); }
   function updateStars() {
@@ -781,13 +855,20 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
     return right;
   }
   let hero0 = { ndcX: 0.36, ndcY: -0.28 };
+  function setView(HV) {                        // HV: how many world units tall the window is, at the head's depth
+    state.HV = HV; state.D = HV / (2 * Math.tan(THREE.MathUtils.degToRad(FOV / 2))); state.PXW = HV / state.vh;
+    SU.uFogD.value = state.D;
+    baseLook.set(0, 0, 0); basePos.set(0, state.D * 0.30, state.D * 0.954);
+    poseCamera(0);
+  }
+  const screenY = v => (1 - v.clone().project(camera).y) / 2 * state.vh;
   function layout() {
     const vw = window.innerWidth, vh = window.innerHeight;
     renderer.setSize(vw, vh); state.vw = vw; state.vh = vh; state.aspect = vw / vh; state.mobile = state.aspect < 1.05 || vw < 760;
     BGU.uRes.value.set(vw, vh);
     { const want = Math.min(window.devicePixelRatio || 1, dprCap); if (Math.abs(want - DPR) > 0.01) setDpr(want); }
     state.HV = state.mobile ? Math.max(1.05, 1.28 / state.aspect) : 1.0;
-    let ndcX = state.mobile ? 0 : 0.36; const ndcY = state.mobile ? 0.24 : -0.28;
+    let ndcX = state.mobile ? 0 : 0.36, ndcY = state.mobile ? 0.24 : -0.28;
     if (!state.mobile && hero) {
       // The head and the headline must never overlap. Fit the whole diorama (pad, props, floating things) into the space right of the text,
       // shrinking it a little on narrower windows rather than sliding under the words.
@@ -798,11 +879,18 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
       ndcX = (cx / vw) * 2 - 1;
     }
     camera.aspect = state.aspect; camera.updateProjectionMatrix();
-    state.D = state.HV / (2 * Math.tan(THREE.MathUtils.degToRad(FOV / 2)));
-    state.PXW = state.HV / vh;
-    SU.uFogD.value = state.D;
-    baseLook.set(0, 0, 0); basePos.set(0, state.D * 0.30, state.D * 0.954);
-    poseCamera(0);
+    setView(state.HV);
+    if (state.mobile && hero) {
+      // On phones the head sits above the words. Fit it, pad and all, between the header and the first line of text (centred in that gap),
+      // up to a fifth smaller if it has to be. On very short screens it keeps to the top and the rock beneath the pad tucks behind the text.
+      const header = document.getElementById('site-header'), copy = hero.querySelector('.hero-copy');
+      const top = (header ? header.offsetHeight : 68) + 6, bottom = (copy ? copy.getBoundingClientRect().top + window.scrollY : vh * 0.62) - 14;
+      const o = worldAtNdc(ndcX, ndcY, 0), y0 = screenY(o);
+      const up = y0 - screenY(o.clone().add(new THREE.Vector3(0, 0.56, 0))), down = screenY(o.clone().add(new THREE.Vector3(0, -0.11, 0.32))) - y0;
+      const k = Math.min(1, Math.max(0.8, (bottom - top) / (up + down)));
+      if (k < 1) setView(state.HV / k);
+      ndcY = 1 - 2 * (top + up * k + Math.max(0, (bottom - top - (up + down) * k) / 2)) / vh;
+    }
     hero0 = { ndcX, ndcY };
     const pt = worldAtNdc(ndcX, ndcY, 0); heroG.position.set(pt.x, pt.y, 0);
     const zb = -2.4, comp = (state.D - zb) / state.D, bp = worldAtNdc(ndcX + (state.mobile ? 0.22 : 0.30), ndcY + (state.mobile ? 0.52 : 0.62), zb);
@@ -829,7 +917,8 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
       const comp = (state.D - d.z) / state.D, k = state.mobile ? (d.s > 0.3 ? 0.55 : 0.7) : 1.0;
       o.scale.setScalar(d.s * comp * k);
     });
-    if (hero) placeFinale(maxScroll);
+    placeFinale(maxScroll);
+    placeSkillPlanets();
     poseCamera(window.scrollY);
     bakeNebula(); updateStars();
   }
@@ -933,7 +1022,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
     const native = window.devicePixelRatio || 1, base = Math.min(native, 1.25);
     if (Math.abs(DPR - base) > 0.01) setDpr(base);
     gpuMs(3, 1);                                 // warm-up: compile programs, allocate buffers
-    const t = Math.max(gpuMs(4, 4), 0.5), want = Math.max(0.75, Math.min(Math.min(native, 1.75), base * Math.sqrt(7 / t)));
+    const t = Math.max(gpuMs(4, 4), 0.5), want = Math.max(0.75, Math.min(Math.min(native, 2), base * Math.sqrt(7 / t)));
     // the first look happens while the page is still loading and can only be pessimistic; the second one (after the landing) is the one to trust
     dprCap = final || t > 14 ? want : Math.max(want, Math.min(native, 1.5));
     setDpr(Math.min(native, dprCap));
@@ -947,7 +1036,10 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
     if (dprCap <= 0.76) govOn = false;
     storeQuality(); gSum = 0; gN = 0;
   }
-  function loop() {
+  function loop(frameTime) {
+    // Smooth scrolling (Lenis) moves the page in its own animation frame. Step it here first, so the scene always draws the page's
+    // scroll position for this frame, never the last one. (Lenis steps by the time since its last step, so a second call in the same frame does nothing.)
+    const lenis = window.JW && window.JW.lenis; if (lenis) lenis.raf(frameTime);
     const now = performance.now();
     // full speed while something is happening (loading, landing, scrolling, moving the pointer); about 30 fps when it's just drifting; nothing at all if motion is reduced
     const active = !launched || now - lastActive < 400 || (!reduce && vt < T_L + 3);
@@ -986,6 +1078,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
       });
     }
     updateFinale(reduce ? 0 : t);
+    updateSkillPlanets(t, dt);
     // the things around the head pop in around the landing
     const pop = headIn > 0 ? sstep(0, 1, (performance.now() - headIn) / 700) : sstep(T_L - 0.2, T_L + 0.9, launched ? vt : 0);
     heroObjs.forEach(o => { o.visible = pop > 0.01 && !(lite && o.userData.kind === 'sparkle'); o.scale.setScalar(o.userData.s * (0.2 + 0.8 * pop)); });

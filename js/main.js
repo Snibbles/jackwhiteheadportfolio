@@ -80,7 +80,7 @@
   ---------------------------------------------------------- */
   run("reveal", () => {
     document.querySelectorAll("[data-reveal]").forEach((el) => {
-      const group = el.parentElement && el.parentElement.closest(".about-grid, .stats, .gallery, .shot-pair, .project-duo");
+      const group = el.parentElement && el.parentElement.closest(".about-grid, .systems, .gallery, .shot-pair, .project-duo");
       const index = group ? Array.from(group.querySelectorAll("[data-reveal]")).indexOf(el) : 0;
       el.style.setProperty("--reveal-delay", reduce ? "0s" : `${Math.min(index, 5) * 0.09}s`);
       const show = () => { el.classList.add("is-visible"); revealHooks.forEach((h) => h(el)); };
@@ -388,6 +388,8 @@
     const lbImg = dlg.querySelector(".lb-img"), lbCap = dlg.querySelector(".lb-cap"), count = dlg.querySelector(".lb-count");
     const prev = dlg.querySelector(".lb-prev"), next = dlg.querySelector(".lb-next"), live = dlg.querySelector("[aria-live]");
     const canMorph = !!document.startViewTransition && !reduce;
+    // the picture and the viewer share one transition name only while morphing; clear it however the morph ends (a skipped one rejects)
+    const unnameAfter = (t, el) => { const unname = () => { el.style.viewTransitionName = ""; }; t.finished.then(unname, unname); };
     let cur = 0;
 
     function show(i, announce) {
@@ -407,7 +409,7 @@
       if (!canMorph) { dlg.classList.add("no-vt"); go(); return; }
       it.img.style.viewTransitionName = "lb-img";
       const t = document.startViewTransition(() => { it.img.style.viewTransitionName = ""; lbImg.style.viewTransitionName = "lb-img"; go(); });
-      t.finished.finally(() => { lbImg.style.viewTransitionName = ""; });
+      unnameAfter(t, lbImg);
     }
     function close() {
       if (!dlg.open) return;
@@ -417,7 +419,7 @@
       if (!canMorph) { done(); return; }
       lbImg.style.viewTransitionName = "lb-img";
       const t = document.startViewTransition(() => { lbImg.style.viewTransitionName = ""; it.img.style.viewTransitionName = "lb-img"; done(); });
-      t.finished.finally(() => { it.img.style.viewTransitionName = ""; });
+      unnameAfter(t, it.img);
     }
     function step(d) {
       show(cur + d, true);
@@ -462,7 +464,10 @@
       document.querySelectorAll("[data-reveal]:not(.is-visible)").forEach((el) => {
         if (el.querySelector("[data-vt]") && onScreen(el)) { el.classList.add("reveal-instant", "is-visible"); shown.push(el); }
       });
-      e.viewTransition.finished.finally(() => { clear(); shown.forEach((el) => el.classList.remove("reveal-instant")); });
+      // a transition the browser skips (say, the tab was hidden) rejects its promises: tidy up either way
+      const done = () => { clear(); shown.forEach((el) => el.classList.remove("reveal-instant")); };
+      e.viewTransition.ready.catch(() => {});
+      e.viewTransition.finished.then(done, done);
     });
   });
 
