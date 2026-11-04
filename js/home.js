@@ -69,24 +69,23 @@
   });
 
   /* ----------------------------------------------------------
-     Crew badge: tilts and catches the light like a holographic card. A mouse over it points the light;
-     otherwise (and on every touch screen) the light follows the card as it travels up the screen.
-     Everything eases toward its target and goes to sleep once it's there.
+     Crew badge: tilts toward a mouse over it; otherwise (and on every touch screen) it leans gently as it
+     travels up the screen. The tilt eases toward its target and goes to sleep once it's there.
   ---------------------------------------------------------- */
   run("crew", () => {
     const crew = document.querySelector(".crew");
     if (!crew) return;
     new IntersectionObserver(([e]) => crew.classList.toggle("is-away", !e.isIntersecting)).observe(crew);
     if (reduce) return;
-    const card = crew.querySelector(".crew-card"), foil = crew.querySelector(".crew-foil"), glare = crew.querySelector(".crew-glare");
-    let w = 1, h = 1, top = 0, pointer = null;
-    const now = { x: 0.3, y: 0.3, rx: 0, ry: 0, k: 0.6 }, goal = { ...now };   // light position (0-1), tilt (deg), brightness (0-1)
-    onMeasure(() => { const r = card.getBoundingClientRect(); w = r.width; h = r.height; top = r.top + scrollY; });
+    const card = crew.querySelector(".crew-card");
+    let h = 1, top = 0, pointer = null;
+    const now = { rx: 0, ry: 0 }, goal = { ...now };                          // the tilt, in degrees
+    onMeasure(() => { const r = card.getBoundingClientRect(); h = r.height; top = r.top + scrollY; });
     const aim = () => {
-      if (pointer) Object.assign(goal, { x: pointer.x, y: pointer.y, rx: (0.5 - pointer.y) * 12, ry: (pointer.x - 0.5) * 16, k: 1 });
+      if (pointer) Object.assign(goal, { rx: (0.5 - pointer.y) * 12, ry: (pointer.x - 0.5) * 16 });
       else {
         const p = clamp((scrollY + innerHeight - top) / (innerHeight + h), 0, 1);   // 0: just in at the bottom, 1: about to leave at the top
-        Object.assign(goal, { x: 0.12 + 0.76 * p, y: 0.86 - 0.72 * p, rx: (0.5 - p) * 14, ry: (p - 0.5) * 9, k: 1 - Math.abs(p - 0.5) * 0.9 });
+        Object.assign(goal, { rx: (0.5 - p) * 14, ry: (p - 0.5) * 9 });
       }
     };
     const wake = whileVisible(crew, (dt) => {
@@ -94,12 +93,7 @@
       const ease = 1 - Math.exp(-dt * 8);
       let moving = false;
       for (const key in now) { const d = goal[key] - now[key]; now[key] += d * ease; if (Math.abs(d) > 0.002) moving = true; }
-      const dx = (now.x - 0.5) * w, dy = (now.y - 0.5) * h;
       card.style.transform = `rotateX(${now.rx.toFixed(2)}deg) rotateY(${now.ry.toFixed(2)}deg)`;
-      foil.style.transform = `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0) rotate(${(now.ry * 4).toFixed(1)}deg)`;   // the stripes turn as it tilts
-      glare.style.transform = `translate3d(${(dx * 1.15).toFixed(1)}px, ${(dy * 1.15).toFixed(1)}px, 0)`;
-      foil.style.opacity = (0.08 + 0.16 * now.k).toFixed(3);
-      glare.style.opacity = (0.25 + 0.5 * now.k).toFixed(3);
       return moving;
     });
     onScroll(() => wake());

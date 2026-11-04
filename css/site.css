@@ -336,7 +336,7 @@ html:not(.has-3d) .replay-btn { display: none; }
 .about-grid { display: grid; gap: clamp(3.5rem, 7vw, 7rem); align-items: center; margin-top: clamp(3rem, 6vw, 5rem); }
 @media (min-width: 960px) { .about-grid { grid-template-columns: minmax(0, 420px) minmax(0, 1fr); } }
 
-/* the crew badge floats in zero-g; it tilts and its holographic foil catches the light, from the pointer or (on touch screens) as you scroll */
+/* the crew badge floats in zero-g, and tilts toward the pointer or (on touch screens) as you scroll */
 .crew { position: relative; width: min(100%, 420px); margin: 0 auto; perspective: 1100px; animation: zero-g 12s ease-in-out infinite; }
 @keyframes zero-g { 0%, 100% { translate: 0 0; rotate: 0deg; } 50% { translate: 0 -14px; rotate: -1.6deg; } }
 @media (min-width: 960px) { .crew { margin: 0; } }
@@ -359,24 +359,6 @@ html:not(.has-3d) .replay-btn { display: none; }
   background: linear-gradient(170deg, rgba(26, 31, 66, 0.96), rgba(13, 15, 32, 0.96));
   box-shadow: 0 50px 90px -40px rgba(0, 0, 0, 0.9), 0 0 90px -30px rgba(75, 115, 255, 0.45);
   rotate: 1.4deg; will-change: transform;
-}
-/* The shine: a rainbow glint and a soft glare, each a round light that slides over the card (js/home.js moves them).
-   They only ever move and fade, so nothing on the card is repainted, which keeps it smooth on phones. */
-.crew-foil, .crew-glare {
-  position: absolute; z-index: 2; left: 50%; top: 50%; aspect-ratio: 1; border-radius: 50%; pointer-events: none;
-  transform: translate3d(-16%, -22%, 0); will-change: transform, opacity;
-}
-.crew-foil {             /* fine rainbow stripes, brightest where the light is */
-  width: 140%; margin: -70% 0 0 -70%;
-  background: repeating-linear-gradient(115deg, #FF7AB0, #F5C443 2.4%, #4FD6B5 4.8%, #4B73FF 7.2%, #7C5CFF 9.6%, #FF7AB0 12%);
-  -webkit-mask: radial-gradient(closest-side, #000 10%, rgba(0, 0, 0, 0.35) 55%, transparent); mask: radial-gradient(closest-side, #000 10%, rgba(0, 0, 0, 0.35) 55%, transparent);
-  mix-blend-mode: color-dodge; opacity: 0.2;
-}
-.crew-glare {            /* a clean diagonal streak of light */
-  width: 120%; margin: -60% 0 0 -60%;
-  background: linear-gradient(115deg, transparent 36%, rgba(255, 255, 255, 0.9) 50%, transparent 64%);
-  -webkit-mask: radial-gradient(closest-side, #000 25%, transparent); mask: radial-gradient(closest-side, #000 25%, transparent);
-  mix-blend-mode: overlay; opacity: 0.4;
 }
 .crew-top, .crew-bottom { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .crew-top { padding: 0.95rem 1.2rem; font: 500 0.66rem/1 var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-dim); }
